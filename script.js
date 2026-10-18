@@ -1,37 +1,34 @@
-/* ===== KONFIGURASI — edit bagian ini saja =====
- - senderName / partnerName : ganti nama
- - apologyLetter            : isi surat (baris kosong = paragraf baru)
- - musicPath                : ganti file musik (taruh di assets/audio/, sesuaikan namanya)
- - memories                 : foto di assets/images/ (memory-1.jpg ... memory-4.jpg), judul, tanggal, caption
- - reasons                  : daftar alasan; kata "Karena " ditambahkan otomatis (reasonPrefix)
- - closing/decline          : pesan penutup */
+/* ===== KONFIGURASI — edit bagian ini saja ===== */
 document.addEventListener("DOMContentLoaded", function() {
 const CONFIG = {
   senderName: "[Ahmad Syauqi]",
   partnerName: "[Annisa Safina]",
-  signatureLead: "with a sincere heart,",
+  signatureLead: "dengan sepenuh hati,",
   typeSpeedMs: 30,
+  
+  // Surat diubah menjadi ungkapan syukur dan janji masa depan
   apologyLetter: `Sayang,
 
-Aku sudah memikirkan semuanya, termasuk hal-hal yang mungkin selama ini tidak cukup aku pahami.
+Terima kasih. Terima kasih karena sudah mau mendengarkan, memahami, dan memberiku kesempatan kedua. Tangisanmu hari ini adalah pengingat betapa berharganya dirimu dan hubungan kita bagiku.
 
-Aku sadar bahwa ada sikap dan perkataanku yang menyakitimu. Aku menyesal karena telah membuat seseorang yang begitu berarti bagiku merasakan hal itu.
+Aku berjanji, lembaran baru ini akan aku isi dengan lebih banyak senyuman, lebih banyak pengertian, dan lebih banyak usaha untuk membahagiakanmu. Aku akan membuktikan bahwa keputusanmu hari ini adalah keputusan yang tidak akan pernah kamu sesali.
 
-Aku tidak ingin sekadar meminta maaf lalu menganggap semuanya selesai. Aku ingin belajar memahami perasaanmu dengan lebih baik, memperbaiki kesalahanku, dan membuktikannya lewat tindakan, bukan hanya kata-kata.
+Ini bukan lagi tentang masa lalu, tapi tentang bagaimana kita melangkah bersama ke depan. 
 
-Aku tahu mungkin sekarang kamu masih kecewa. Aku tidak akan memaksamu untuk segera memaafkanku. Aku hanya ingin kamu tahu bahwa perasaanmu berarti bagiku dan aku benar-benar menyesali apa yang telah terjadi.
-
-Terima kasih sudah menjadi bagian dari banyak hal indah dalam hidupku.
-
-Maafkan aku, ya. Aku masih punya banyak hal yang ingin aku perbaiki, terutama dalam diriku sendiri.`,
+Aku menyayangimu, lebih dari yang bisa aku ungkapkan dengan kata-kata. Mari kita mulai lagi, dan buat lebih banyak kenangan indah bersama.`,
+  
   musicEnabled: true,
   musicPath: "assets/audio/lagu-kita.mp3",
+  
+  // Saya tambahkan slot kenangan ke-5 untuk hari ini
   memories: [
     { title: "The First Memory", image: "assets/images/memory-1.jpeg", date: "18 Agustus 2026", caption: "Ini pas pertama kali kita foto sayangggg.. ingatt kann??" },
     { title: "That Random Day", image: "assets/images/memory-2.jpeg", date: "21 Agustus 2026", caption: "Foto ini pas magrib magrib banget.. dua duanya cape HAHHA" },
     { title: "The Love", image: "assets/images/memory-3.jpeg", date: "2 Oktober 2026", caption: "HAHHA ingett bangett ini pas kita awal awal go public" },
-    { title: "My Favorite Photo", image: "assets/images/memory-4.jpeg", date: "16 Oktober 2026", caption: "SUMPAH AKU GA BOSEN LIATIN FOTO INI SAYANGG" }
+    { title: "My Favorite Photo", image: "assets/images/memory-4.jpeg", date: "16 Oktober 2026", caption: "SUMPAH AKU GA BOSEN LIATIN FOTO INI SAYANGG" },
+    { title: "Our New Chapter", image: "assets/images/memory-5.jpeg", date: "18 Oktober 2026", caption: "Hari di mana kita memutuskan untuk melangkah bersama lagi. Terima kasih atas kesempatannya 🤍" }
   ],
+  
   reasonPrefix: "Karena ",
   reasons: [
     "kamu bisa membuat hari biasa terasa lebih berarti.",
@@ -135,12 +132,11 @@ Maafkan aku, ya. Aku masih punya banyak hal yang ingin aku perbaiki, terutama da
     "kamu membuatku percaya bahwa hal-hal baik layak diperjuangkan.",
     "aku masih ingin belajar mencintaimu dengan cara yang lebih baik."
   ],
-  decline: "Tidak apa-apa. Aku mengerti kalau kamu masih butuh waktu. Terima kasih sudah membaca semuanya.",
-  closing: `Terima kasih sudah memberiku ruang untuk memperbaiki semuanya.
+  
+  // Penutup diubah menjadi pesan romantis
+  closing: `Museum ini akan terus bertambah koleksinya, seiring dengan waktu yang kita habiskan berdua.
 
-Aku nggak mau berhenti di kata maaf. Aku ingin membuktikan bahwa aku bisa belajar dari kesalahanku.
-
-Aku akan menghubungimu sekarang, kalau kamu juga siap. 🤍`
+I love you, Annisa Safina. 🤍`
 };
 
 /* ===== Helper ===== */
@@ -154,7 +150,7 @@ function initGate() {
   btn.textContent = `Untuk ${CONFIG.partnerName}, sentuh di sini`;
   let busy = false;
   btn.addEventListener("click", () => {
-    if (busy) return;               // cegah klik berulang
+    if (busy) return;
     busy = true; btn.disabled = true;
     startMusic();
     $("main").hidden = false;
@@ -171,7 +167,7 @@ function startMusic() {
   const mbtn = $("musicBtn");
   if (!CONFIG.musicEnabled) return;
   try {
-    audio = new Audio(CONFIG.musicPath);   // ganti file lewat CONFIG.musicPath
+    audio = new Audio(CONFIG.musicPath);
     audio.loop = true; audio.volume = 0.5;
     audio.addEventListener("error", () => { mbtn.hidden = true; });
     const p = audio.play();
@@ -231,7 +227,7 @@ function initGallery() {
     const photo = document.createElement("div"); photo.className = "photo";
     const img = document.createElement("img");
     img.src = m.image; img.alt = `Foto kenangan: ${m.title}`; img.loading = "lazy";
-    img.addEventListener("error", () => card.classList.add("nophoto"));   // fallback foto
+    img.addEventListener("error", () => card.classList.add("nophoto"));
     photo.appendChild(img);
 
     const label = document.createElement("div"); label.className = "label"; label.textContent = m.title;
@@ -242,7 +238,7 @@ function initGallery() {
 
     card.append(photo, label, meta);
     card.addEventListener("click", () => {
-      const open = card.classList.toggle("open");   // klik lagi untuk menutup
+      const open = card.classList.toggle("open");
       card.setAttribute("aria-expanded", String(open));
     });
     g.appendChild(card);
@@ -258,7 +254,7 @@ function initModal() {
   let last = null;
   const onKey = e => {
     if (e.key === "Escape") return close();
-    if (e.key === "Tab") {                       // jaga fokus tetap di dalam modal
+    if (e.key === "Tab") {
       const f = [closeBtn, list];
       if (e.shiftKey && document.activeElement === closeBtn) { e.preventDefault(); list.focus(); }
       else if (!e.shiftKey && document.activeElement === list) { e.preventDefault(); closeBtn.focus(); }
@@ -280,68 +276,11 @@ function initModal() {
   modal.addEventListener("click", e => { if (e.target === modal) close(); });
 }
 
-/* ===== 05 Jawaban ===== */
-function initAnswers() {
-  const decline = $("declineMsg");
-  const noBtn = $("noBtn");
-  const yesBtn = $("yesBtn");
-  
-  let noClickCount = 0;
-  
-  // Kita atur ukuran awal untuk tombol YES
-  let currentFontSize = 1; // dalam rem (standarnya 1rem)
-  let currentPadding = 0.8; // dalam rem (standarnya 0.8rem vertikal)
-
-  // Daftar teks lucu
-  const noTexts = [
-    "Beneran nih?",
-    "Yakin nggak mau maafin?",
-    "Pikirin lagi donggg",
-    "Tega banget ih 🥺",
-    "Plis maafin akuuu...",
-    "Jangan pencet ini lagi dong!",
-    "Pencet yang sebelah kiri aja 😭",
-    "Oke, tombol ini aku sita! 🏃💨"
-  ];
-
-  noBtn.addEventListener("click", () => {
-    if (noClickCount < noTexts.length) {
-      noBtn.textContent = noTexts[noClickCount];
-      noClickCount++;
-      
-      // Membesarkan tombol YES secara proporsional tanpa menimpa layout
-      currentFontSize += 0.2; // Tambah ukuran teks
-      currentPadding += 0.15; // Tambah jarak di dalam tombol
-      
-      yesBtn.style.fontSize = `${currentFontSize}rem`;
-      yesBtn.style.padding = `${currentPadding}rem ${currentPadding * 2}rem`;
-      yesBtn.style.transition = "all 0.3s ease";
-      
-    } else {
-      // Hilangkan tombol NO di klik terakhir
-      noBtn.style.display = "none";
-    }
-  });
-
-  yesBtn.addEventListener("click", () => {
-    // Reset ukuran (opsional, agar saat transisi tidak aneh)
-    yesBtn.style.fontSize = "";
-    yesBtn.style.padding = "";
-    
-    showClosing();
-  });
-
-  // Tombol kembali/tutup bawaan (biarkan saja)
-  $("backBtn").addEventListener("click", () => {
-    decline.hidden = true;
-    $("capsule").scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-  });
-  $("closeSiteBtn").addEventListener("click", () => {
-    window.close();
-    $("closeHint").hidden = false;
-  });
+/* ===== 05 Tombol Masa Depan ===== */
+function initFuture() {
+  $("futureBtn").addEventListener("click", showClosing);
 }
-// PASTIKAN FUNGSI INI TETAP ADA TEPAT DI BAWAH initAnswers()
+
 function showClosing() {
   const scene = $("scene");
   $("sceneMsg").textContent = CONFIG.closing; 
@@ -360,7 +299,7 @@ function showClosing() {
   }
 }
 
-// ----- PINDAHKAN KODE OBSERVER KE SINI -----
+/* ===== Observer untuk efek Fade-in ===== */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
@@ -372,15 +311,10 @@ const observer = new IntersectionObserver((entries) => {
 
 const hiddenElements = document.querySelectorAll('.fade-in-section');
 hiddenElements.forEach((el) => observer.observe(el));
-// -------------------------------------------
 
-/* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
-[initGate, initGallery, initModal, initAnswers].forEach(fn => {
+/* ===== Init ===== */
+[initGate, initGallery, initModal, initFuture].forEach(fn => {
   try { fn(); } catch (e) { console.error(fn.name, e); }
 });
 
-}); // Ini adalah penutup dari document.addEventListener("DOMContentLoaded", function() { di baris paling atas
-/* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
-[initGate, initGallery, initModal, initAnswers].forEach(fn => {
-  try { fn(); } catch (e) { console.error(fn.name, e); }
 });
