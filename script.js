@@ -182,6 +182,7 @@ function startMusic() {
 
 /* ===== 02 Surat / Pengantar ===== */
 let typeTimer = null, typed = false;
+
 function finishLetter() {
   clearTimeout(typeTimer);
   $("letterText").textContent = CONFIG.apologyLetter;
@@ -189,8 +190,16 @@ function finishLetter() {
   const sig = $("signature");
   sig.textContent = `${CONFIG.signatureLead}\n${CONFIG.senderName}`;
   sig.classList.add("show");
+  
+  // -- KODE EASTER EGG --
+  sig.style.cursor = "pointer";
+  sig.addEventListener("click", () => {
+    alert("Rahasia Kurator: Aku selalu jatuh cinta padamu, setiap hari. 🤍");
+  }, { once: true }); // Memastikan pesan hanya muncul 1 kali
 }
+
 function startTypewriter() {
+// ... (lanjutan kodemu di bawahnya biarkan saja)
   if (typed) return; typed = true;
   if (reduced) return finishLetter();
   const text = CONFIG.apologyLetter, out = $("letterText");
@@ -315,21 +324,6 @@ function showClosing() {
     `;
     box.appendChild(p);
   }
-}
-
-function finishLetter() {
-  clearTimeout(typeTimer);
-  $("letterText").textContent = CONFIG.apologyLetter;
-  $("cursor").classList.add("done");
-  const sig = $("signature");
-  sig.textContent = `${CONFIG.signatureLead}\n${CONFIG.senderName}`;
-  sig.classList.add("show");
-  
-  // -- KODE EASTER EGG --
-  sig.style.cursor = "pointer";
-  sig.addEventListener("click", () => {
-    alert("Rahasia Kurator: Aku selalu jatuh cinta padamu, setiap hari. 🤍");
-  }, { once: true }); // { once: true } memastikan pesan hanya muncul 1 kali
 }
 
 /* ===== Observer ===== */
