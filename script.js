@@ -283,32 +283,53 @@ function initModal() {
 /* ===== 05 Jawaban ===== */
 function initAnswers() {
   const decline = $("declineMsg");
-  $("noBtn").addEventListener("click", () => {
-    decline.querySelector("p").textContent = CONFIG.decline;
-    decline.hidden = false; decline.focus();
+  const noBtn = $("noBtn");
+  const yesBtn = $("yesBtn");
+  
+  let noClickCount = 0;
+  let yesScale = 1;
+  
+  // Daftar teks lucu yang akan muncul bergantian saat dia klik "Belum bisa"
+  const noTexts = [
+    "Beneran nih?",
+    "Yakin nggak mau maafin?",
+    "Pikirin lagi donggg",
+    "Tega banget ih 🥺",
+    "Plis maafin akuuu...",
+    "Jangan pencet ini lagi dong!",
+    "Pencet yang sebelah kiri aja 😭",
+    "Oke, tombol ini aku sita! 🏃💨"
+  ];
+
+  noBtn.addEventListener("click", () => {
+    if (noClickCount < noTexts.length) {
+      // 1. Ganti teks tombol "Belum bisa" dengan rayuan
+      noBtn.textContent = noTexts[noClickCount];
+      noClickCount++;
+      
+      // 2. Bikin tombol "Iya, aku maafin" makin membesar
+      yesScale += 0.35; // Tambah ukuran 35% setiap kali diklik
+      yesBtn.style.transform = `scale(${yesScale})`;
+      yesBtn.style.transition = "transform 0.3s ease";
+      
+    } else {
+      // 3. Kalau udah mentok, tombol "Belum bisa" akan hilang sepenuhnya
+      noBtn.style.display = "none";
+    }
   });
+
+  // Tombol Yes tetap menjalankan animasi penutup kelopak bunga seperti biasa
+  yesBtn.addEventListener("click", showClosing);
+
+  // Fungsi tombol kembali/tutup bawaan (tetap dibiarkan jika sewaktu-waktu terpakai)
   $("backBtn").addEventListener("click", () => {
     decline.hidden = true;
     $("capsule").scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   });
   $("closeSiteBtn").addEventListener("click", () => {
-    window.close();                              // hanya berhasil jika tab dibuka lewat skrip
+    window.close();
     $("closeHint").hidden = false;
   });
-  $("yesBtn").addEventListener("click", showClosing);
-}
-function showClosing() {
-  const scene = $("scene");
-  $("sceneMsg").textContent = CONFIG.closing;
-  scene.hidden = false; document.body.classList.add("locked");
-  if (reduced) return;
-  const box = $("petals"), colors = ["#D8A7A7", "#B97C83", "#EDE2D5"];
-  for (let i = 0; i < 22; i++) {                 // jumlah kelopak dibuat sedikit agar ringan
-    const p = document.createElement("span");
-    p.className = "petal";
-    p.style.cssText = `left:${Math.random() * 100}%;background:${colors[i % 3]};--dx:${(Math.random() - .5) * 120}px;animation-duration:${7 + Math.random() * 6}s;animation-delay:${-Math.random() * 10}s`;
-    box.appendChild(p);
-  }
 }
 
 /* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
