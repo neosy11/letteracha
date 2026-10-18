@@ -30,6 +30,19 @@ background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' 
 .music{position:fixed;top:1rem;right:1rem;z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid var(--pink);background:var(--white);color:var(--rose);font-size:1.2rem;cursor:pointer;box-shadow:0 2px 8px rgba(75,56,50,.12)}
 .music.paused{opacity:.55;text-decoration:line-through}
 
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(30px); 
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Keadaan akhir (saat masuk layar): Muncul dan naik ke posisi asli */
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 .letter-sec .display{max-width:24ch}
 .paper{width:min(100%,38rem);background:#fffdf9;padding:clamp(1.5rem,5vw,3rem);text-align:left;border-radius:4px;box-shadow:0 1px 3px rgba(75,56,50,.15),0 12px 30px -12px rgba(75,56,50,.2);font:400 1.1rem/1.95 var(--lora);transform:rotate(-.4deg)}
 .letter-text{white-space:pre-wrap;display:inline}
