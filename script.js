@@ -48,42 +48,95 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ===== AUTHENTICATION ===== */
-  async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      STATE.user = session.user;
-      STATE.isCurator = true;
-      $('curatorBadge').classList.remove('hidden');$('titipBtn').classList.remove('hidden');
-      $('addReasonContainer').classList.remove('hidden');$('loginBtn').hidden = true;
-    }
-  }
+  
+$('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-  $('loginBtn').addEventListener('click', () => {$('authModal').hidden = false; });
-  document.querySelectorAll('.close-auth-modal').forEach(btn => {
-    btn.addEventListener('click', () => $('authModal').hidden = true);
-  });
+  const email = $('authEmail').value.trim();
+  const password = $('authPassword').value;
+  const btn = e.currentTarget.querySelector('button');
 
-  $('authForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = $('authEmail').value;
-    const password = $('authPassword').value;
-    const btn = e.target.querySelector('button');
-    btn.textContent = 'Memverifikasi...';
-    btn.disabled = true;
+  btn.textContent = 'Memverifikasi...';
+  btn.disabled = true;
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
+  try {
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
     if (error) {
-      showToast('Akses ditolak. Kredensial tidak valid.', 'error');
-    } else {
-      showToast('Selamat datang kembali, Kurator.');
-      $('authModal').hidden = true;
-      await checkAuth();
-      loadMemories(); // Reload with curator privileges (edit/delete UI if implemented)
+      // Tampilkan error asli di Console untuk diagnosis.
+      console.error('Supabase login error:', {
+        message: error.message,
+        code: error.code,
+        status: error.status
+      });
+
+      const details =
+        `${error.code || ''} ${error.message || ''}`
+          .toLowerCase();
+
+      let message;
+
+      if (
+        details.includes('email_not_confirmed') ||
+        details.includes('email not confirmed')
+      ) {
+        message =
+          'Email belum dikonfirmasi di Supabase.';
+      } else if (
+        details.includes('invalid login credentials')
+      ) {
+        message =
+          'Email atau password salah. Pastikan akun memiliki password Supabase yang benar.';
+      } else if (
+        details.includes('invalid api key')
+      ) {
+        message =
+          'API key ditolak. Periksa key dan project Supabase.';
+      } else {
+        message =
+          `Login gagal: ${error.message}`;
+      }
+
+      showToast(message, 'error');
+      return;
     }
+
+    if (!data.user || !data.session) {
+      throw new Error(
+        'Login tidak menghasilkan session yang valid.'
+      );
+    }
+
+    // Simpan status pengguna yang berhasil login.
+    STATE.user = data.user;
+    STATE.isCurator = true;
+
+    $('curatorBadge').classList.remove('hidden');
+    $('titipBtn').classList.remove('hidden');
+    $('addReasonContainer').classList.remove('hidden');
+    $('loginBtn').hidden = true;
+    $('authModal').hidden = true;
+
+    showToast('Login berhasil. Selamat datang kembali!');
+
+    await loadMemories();
+
+  } catch (err) {
+    console.error('Login exception:', err);
+
+    showToast(
+      `Terjadi kesalahan: ${err.message || 'Periksa koneksi dan Console.'}`,
+      'error'
+    );
+  } finally {
     btn.textContent = 'Masuk';
     btn.disabled = false;
-  });
+  }
+});
 
   /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
