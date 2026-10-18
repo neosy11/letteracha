@@ -61,35 +61,72 @@ async function checkAuth() {
       return;
     }
 
-    if (session) {
+    const curatorBadge = $("curatorBadge");
+    const titipBtn = $("titipBtn");
+    const addReasonContainer = $("addReasonContainer");
+    const loginBtn = $("loginBtn");
+
+    if (session?.user) {
       STATE.user = session.user;
-      STATE.isCurator = true;
 
-      const curatorBadge = $("curatorBadge");
-      const titipBtn = $("titipBtn");
-      const addReasonContainer = $("addReasonContainer");
-      const loginBtn = $("loginBtn");
+      const email = (session.user.email || "").trim().toLowerCase();
 
+      STATE.isCurator = CURATOR_EMAILS.includes(email);
+
+      console.log(
+        STATE.isCurator
+          ? `Session curator ditemukan: ${email}`
+          : `User biasa ditemukan: ${email}`
+      );
+
+      // Badge curator
       if (curatorBadge) {
-        curatorBadge.classList.remove("hidden");
+        curatorBadge.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
       }
 
+      // Tombol tambah kenangan
       if (titipBtn) {
-        titipBtn.classList.remove("hidden");
+        titipBtn.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
       }
 
+      // Tombol tambah "100 Hal"
       if (addReasonContainer) {
-        addReasonContainer.classList.remove("hidden");
+        addReasonContainer.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
       }
 
+      // Tombol login
       if (loginBtn) {
         loginBtn.hidden = true;
       }
 
-      console.log("Session kurator ditemukan:", session.user.email);
     } else {
       STATE.user = null;
       STATE.isCurator = false;
+
+      if (curatorBadge) {
+        curatorBadge.classList.add("hidden");
+      }
+
+      if (titipBtn) {
+        titipBtn.classList.add("hidden");
+      }
+
+      if (addReasonContainer) {
+        addReasonContainer.classList.add("hidden");
+      }
+
+      if (loginBtn) {
+        loginBtn.hidden = false;
+      }
 
       console.log("Tidak ada session aktif.");
     }
@@ -98,7 +135,6 @@ async function checkAuth() {
     console.error("checkAuth error:", err);
   }
 }
-
 
 /* ===== BUKA MODAL LOGIN ===== */
 
@@ -190,59 +226,7 @@ if (authForm) {
     }
   });
 }
-  /* ===== CEK SESSION SUPABASE ===== */
-async function checkAuth() {
-  try {
-    const {
-      data: { session },
-      error
-    } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error("Gagal mengecek session:", error);
-      return;
-    }
-
-    if (session) {
-      STATE.user = session.user;
-      STATE.isCurator = true;
-
-      const curatorBadge = $("curatorBadge");
-      const titipBtn = $("titipBtn");
-      const addReasonContainer = $("addReasonContainer");
-      const loginBtn = $("loginBtn");
-
-      if (curatorBadge) {
-        curatorBadge.classList.remove("hidden");
-      }
-
-      if (titipBtn) {
-        titipBtn.classList.remove("hidden");
-      }
-
-      if (addReasonContainer) {
-        addReasonContainer.classList.remove("hidden");
-      }
-
-      if (loginBtn) {
-        loginBtn.hidden = true;
-      }
-
-      console.log(
-        "Session kurator ditemukan:",
-        session.user.email
-      );
-    } else {
-      STATE.user = null;
-      STATE.isCurator = false;
-
-      console.log("Tidak ada session aktif.");
-    }
-
-  } catch (err) {
-    console.error("checkAuth error:", err);
-  }
-}
 /* ===== MUSEUM SECTION NAVIGATION ===== */
 
 function initMuseumNavigation() {
