@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   /* ===== KONFIGURASI SUPABASE ===== */
   // MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI
-  const SUPABASE_URL = 'https://hggbpvgyvtoxlfsgglom.supabase.co/rest/v1/';
+  const SUPABASE_URL = 'https://hggbpvgyvtoxlfsgglom.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZ2Jwdmd5dnRveGxmc2dnbG9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDAzMDAsImV4cCI6MjEwNzg3NjMwMH0.OqF6TqPvKLejLMYWBkwYhAif_SB4On9ID216YR6TC_Q';
   
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
