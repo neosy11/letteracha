@@ -331,7 +331,7 @@ const hiddenElements = document.querySelectorAll('.fade-in-section');
 hiddenElements.forEach((el) => observer.observe(el));
 
 /* ===== Init ===== */
-[initGate, initGallery, initModal, initFuture].forEach(fn => {
+[initGate, initGallery, initModal, initFuture, initTitip].forEach(fn => {
   try { fn(); } catch (e) { console.error(fn.name, e); }
 });
 
