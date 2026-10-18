@@ -1,32 +1,28 @@
-/* ===== KONFIGURASI — edit bagian ini saja ===== */
+/* ===== KONFIGURASI ===== */
 document.addEventListener("DOMContentLoaded", function() {
 const CONFIG = {
   senderName: "[Ahmad Syauqi]",
   partnerName: "[Annisa Safina]",
-  signatureLead: "dengan sepenuh hati,",
-  typeSpeedMs: 30,
+  signatureLead: "Kurator Museum,",
+  typeSpeedMs: 40,
   
-  // Surat diubah menjadi ungkapan syukur dan janji masa depan
-  apologyLetter: `Sayang,
+  // Teks diubah agar "timeless" (bisa dibaca bertahun-tahun lagi)
+  apologyLetter: `Selamat datang di tempat di mana waktu berhenti sejenak.
 
-Terima kasih. Terima kasih karena sudah mau mendengarkan, memahami, dan memberiku kesempatan kedua. Tangisanmu hari ini adalah pengingat betapa berharganya dirimu dan hubungan kita bagiku.
+Tempat ini dibangun bukan untuk mengingat satu hari tertentu, melainkan untuk menyimpan jejak dari setiap langkah yang kita ambil bersama. Dari tawa yang tak sengaja terekam, hingga keheningan yang nyaman saat kita berdua.
 
-Aku berjanji, lembaran baru ini akan aku isi dengan lebih banyak senyuman, lebih banyak pengertian, dan lebih banyak usaha untuk membahagiakanmu. Aku akan membuktikan bahwa keputusanmu hari ini adalah keputusan yang tidak akan pernah kamu sesali.
+Mungkin akan ada masa di mana kita lupa, lelah, atau tersesat dalam rutinitas. Saat hari itu tiba, aku harap museum ini bisa menjadi tempat kita pulang—untuk mengingatkan kembali bagaimana semua ini dimulai, dan mengapa kita memilih untuk terus bertahan.
 
-Ini bukan lagi tentang masa lalu, tapi tentang bagaimana kita melangkah bersama ke depan. 
-
-Aku menyayangimu, lebih dari yang bisa aku ungkapkan dengan kata-kata. Mari kita mulai lagi, dan buat lebih banyak kenangan indah bersama.`,
+Silakan berkeliling. Ruangan ini adalah milikmu, sama seperti hatiku.`,
   
   musicEnabled: true,
   musicPath: "assets/audio/lagu-kita.mp3",
   
-  // Saya tambahkan slot kenangan ke-5 untuk hari ini
   memories: [
-    { title: "The First Memory", image: "assets/images/memory-1.jpeg", date: "18 Agustus 2026", caption: "Ini pas pertama kali kita foto sayangggg.. ingatt kann??" },
-    { title: "That Random Day", image: "assets/images/memory-2.jpeg", date: "21 Agustus 2026", caption: "Foto ini pas magrib magrib banget.. dua duanya cape HAHHA" },
-    { title: "The Love", image: "assets/images/memory-3.jpeg", date: "2 Oktober 2026", caption: "HAHHA ingett bangett ini pas kita awal awal go public" },
-    { title: "My Favorite Photo", image: "assets/images/memory-4.jpeg", date: "16 Oktober 2026", caption: "SUMPAH AKU GA BOSEN LIATIN FOTO INI SAYANGG" },
-    { title: "Our New Chapter", image: "assets/images/memory-5.jpeg", date: "18 Oktober 2026", caption: "Hari di mana kita memutuskan untuk melangkah bersama lagi. Terima kasih atas kesempatannya 🤍" }
+    { title: "The Beginning", image: "assets/images/memory-1.jpeg", date: "18 Agustus 2026", caption: "Potret pertama kita. Awal dari segala cerita panjang yang ada di ruangan ini." },
+    { title: "Dusk & Exhaustion", image: "assets/images/memory-2.jpeg", date: "21 Agustus 2026", caption: "Difoto saat matahari terbenam. Kita berdua sangat lelah hari itu, tapi tetap tersenyum." },
+    { title: "The Declaration", image: "assets/images/memory-3.jpeg", date: "2 Oktober 2026", caption: "Momen saat dunia akhirnya tahu bahwa kita memilih satu sama lain." },
+    { title: "A Masterpiece", image: "assets/images/memory-4.jpeg", date: "16 Oktober 2026", caption: "Salah satu karya favorit di museum ini. Aku tidak pernah bosan memandanginya." }
   ],
   
   reasonPrefix: "Karena ",
@@ -133,10 +129,10 @@ Aku menyayangimu, lebih dari yang bisa aku ungkapkan dengan kata-kata. Mari kita
     "aku masih ingin belajar mencintaimu dengan cara yang lebih baik."
   ],
   
-  // Penutup diubah menjadi pesan romantis
-  closing: `Museum ini akan terus bertambah koleksinya, seiring dengan waktu yang kita habiskan berdua.
+  closing: `Terima kasih atas kunjungannya.
+Museum ini akan selalu terbuka untukmu.
 
-I love you, Annisa Safina. 🤍`
+I love you.`
 };
 
 /* ===== Helper ===== */
@@ -147,7 +143,7 @@ let audio = null;
 /* ===== 01 Gate + musik ===== */
 function initGate() {
   const btn = $("openBtn");
-  btn.textContent = `Untuk ${CONFIG.partnerName}, sentuh di sini`;
+  btn.textContent = `Buka Pintu Untuk ${CONFIG.partnerName}`;
   let busy = false;
   btn.addEventListener("click", () => {
     if (busy) return;
@@ -159,7 +155,7 @@ function initGate() {
       $("gate").hidden = true;
       document.body.classList.remove("locked");
       initLetterObserver();
-    }, reduced ? 50 : 900);
+    }, reduced ? 50 : 1500);
   });
 }
 
@@ -184,7 +180,7 @@ function startMusic() {
   });
 }
 
-/* ===== 02 Surat (typewriter) ===== */
+/* ===== 02 Surat / Pengantar ===== */
 let typeTimer = null, typed = false;
 function finishLetter() {
   clearTimeout(typeTimer);
@@ -193,7 +189,6 @@ function finishLetter() {
   const sig = $("signature");
   sig.textContent = `${CONFIG.signatureLead}\n${CONFIG.senderName}`;
   sig.classList.add("show");
-  $("skipBtn").hidden = true;
 }
 function startTypewriter() {
   if (typed) return; typed = true;
@@ -204,11 +199,10 @@ function startTypewriter() {
     if (i >= text.length) return finishLetter();
     out.textContent = text.slice(0, ++i);
     const ch = text[i - 1];
-    typeTimer = setTimeout(tick, CONFIG.typeSpeedMs + (/[.,\n]/.test(ch) ? 160 : 0));
+    typeTimer = setTimeout(tick, CONFIG.typeSpeedMs + (/[.,\n]/.test(ch) ? 200 : 0));
   })();
 }
 function initLetterObserver() {
-  $("skipBtn").addEventListener("click", () => { typed = true; finishLetter(); });
   if (!("IntersectionObserver" in window)) return startTypewriter();
   const io = new IntersectionObserver(es => {
     if (es[0].isIntersecting) { io.disconnect(); startTypewriter(); }
@@ -216,7 +210,7 @@ function initLetterObserver() {
   io.observe($("letter"));
 }
 
-/* ===== 03 Galeri kenangan ===== */
+/* ===== 03 Galeri Kenangan ===== */
 function initGallery() {
   const g = $("gallery");
   CONFIG.memories.forEach(m => {
@@ -226,7 +220,7 @@ function initGallery() {
 
     const photo = document.createElement("div"); photo.className = "photo";
     const img = document.createElement("img");
-    img.src = m.image; img.alt = `Foto kenangan: ${m.title}`; img.loading = "lazy";
+    img.src = m.image; img.alt = `Lukisan: ${m.title}`; img.loading = "lazy";
     img.addEventListener("error", () => card.classList.add("nophoto"));
     photo.appendChild(img);
 
@@ -245,7 +239,7 @@ function initGallery() {
   });
 }
 
-/* ===== 04 Modal alasan ===== */
+/* ===== 04 Modal Koleksi 100 Hal ===== */
 function initModal() {
   const modal = $("modal"), list = $("reasonList"), openBtn = $("reasonsBtn"), closeBtn = $("modalClose");
   const frag = document.createDocumentFragment();
@@ -276,7 +270,7 @@ function initModal() {
   modal.addEventListener("click", e => { if (e.target === modal) close(); });
 }
 
-/* ===== 05 Tombol Masa Depan ===== */
+/* ===== 05 Penutup (Efek Debu Cahaya) ===== */
 function initFuture() {
   $("futureBtn").addEventListener("click", showClosing);
 }
@@ -288,18 +282,25 @@ function showClosing() {
   document.body.classList.add("locked");
 
   if (reduced) return;
-  const box = $("petals"), colors = ["#D8A7A7", "#B97C83", "#EDE2D5"];
+  const box = $("petals");
   box.innerHTML = ''; 
 
-  for (let i = 0; i < 22; i++) {                 
+  // Mengubah kelopak bunga menjadi efek debu cahaya yang melayang (seperti di sorotan lampu museum)
+  for (let i = 0; i < 40; i++) {                 
     const p = document.createElement("span");
-    p.className = "petal";
-    p.style.cssText = `left:${Math.random() * 100}%;background:${colors[i % 3]};--dx:${(Math.random() - .5) * 120}px;animation-duration:${7 + Math.random() * 6}s;animation-delay:${-Math.random() * 10}s`;
+    p.className = "dust";
+    const size = Math.random() * 4 + 2;
+    p.style.cssText = `
+      left:${Math.random() * 100}%;
+      width: ${size}px; height: ${size}px;
+      animation-duration:${8 + Math.random() * 10}s;
+      animation-delay:${-Math.random() * 5}s
+    `;
     box.appendChild(p);
   }
 }
 
-/* ===== Observer untuk efek Fade-in ===== */
+/* ===== Observer ===== */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
