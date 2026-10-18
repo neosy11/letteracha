@@ -49,6 +49,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* ===== AUTHENTICATION ===== */
   
+const loginButton = $('loginBtn');
+const authModal = $('authModal');
+
+if (loginButton && authModal) {
+  loginButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    authModal.hidden = false;
+
+    console.log('Modal login dibuka.');
+  });
+} else {
+  console.error(
+    'Elemen loginBtn atau authModal tidak ditemukan.'
+  );
+}
+
 $('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
