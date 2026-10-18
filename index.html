@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>a little something</title>
+<title>Museum Kenangan Kita</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Lora:ital@0;1&family=Playfair+Display:wght@500;600&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -12,15 +12,16 @@
 
 <section id="gate" class="gate">
   <span class="glow" aria-hidden="true"></span>
-  <p class="gate-note">a little something, from me to you</p>
+  <p class="gate-note">Selamat datang di Museum Kenangan Kita</p>
   <button id="openBtn" class="btn btn-primary" type="button"></button>
 </section>
 
 <main id="main" hidden>
   <button id="musicBtn" class="music" type="button" aria-label="Jeda musik" aria-pressed="false" hidden>♪</button>
 
+  <!-- Bagian Surat Masa Depan -->
   <section class="sec letter-sec fade-in-section" id="letter">
-    <h2 class="display">there are things I should have said sooner…</h2>
+    <h2 class="display">Lembaran Baru Kita...</h2>
     <article class="paper" aria-live="off">
       <p id="letterText" class="letter-text"></p><span id="cursor" class="cursor" aria-hidden="true"></span>
       <p id="signature" class="signature"></p>
@@ -28,45 +29,41 @@
     <button id="skipBtn" class="btn btn-ghost" type="button">Lewati animasi</button>
   </section>
 
-  <section class="sec letter-sec fade-in-section" id="capsule">
-    <h2 class="display">the time capsule</h2>
-    <p class="hint">Sentuh kartu untuk membukanya.</p>
+  <!-- Bagian Kapsul Waktu / Galeri -->
+  <section class="sec capsule-sec fade-in-section" id="capsule">
+    <h2 class="display">Kapsul Waktu Perjalanan Kita</h2>
+    <p class="hint">Sentuh kartu untuk membuka kenangannya.</p>
     <div id="gallery" class="gallery"></div>
   </section>
 
-  <section class="sec letter-sec fade-in-section" id="little">
-    <h2 class="display">Hal-hal kecil yang membuatku menyayangimu</h2>
-    <button id="reasonsBtn" class="btn btn-primary" type="button" aria-haspopup="dialog">Kenapa aku nggak mau kehilangan kamu</button>
+  <!-- Bagian 100 Hal -->
+  <section class="sec little-sec fade-in-section" id="little">
+    <h2 class="display">Hal-hal yang membuatku jatuh cinta berkali-kali</h2>
+    <button id="reasonsBtn" class="btn btn-primary" type="button" aria-haspopup="dialog">100 hal yang aku cintai darimu</button>
   </section>
 
-  <section class="sec final-sec" id="final">
-    <p class="final-text">Aku tahu aku salah. Aku nggak bisa mengubah apa yang sudah terjadi, tapi aku ingin belajar menjadi lebih baik.</p>
-    <p class="final-q">Kalau kamu sudah siap, maukah kamu memberi aku satu kesempatan lagi?</p>
+  <!-- Bagian Penutup Baru (Tanpa Penolakan) -->
+  <section class="sec final-sec fade-in-section" id="final">
+    <p class="final-text">Terima kasih sudah memberiku kesempatan untuk terus mengukir cerita bersamamu.</p>
+    <p class="final-q">Mari melangkah ke depan, bersama-sama.</p>
     <div class="answers">
-      <button id="yesBtn" class="btn btn-primary" type="button">Iya, aku maafin</button>
-      <button id="noBtn" class="btn btn-ghost nudge" type="button">Belum bisa</button>
-    </div>
-    <div id="declineMsg" class="decline" hidden tabindex="-1">
-      <p>Tidak apa-apa. Aku mengerti kalau kamu masih butuh waktu. Terima kasih sudah membaca semuanya.</p>
-      <div class="answers">
-        <button id="backBtn" class="btn btn-ghost" type="button">Lihat kenangan lagi</button>
-        <button id="closeSiteBtn" class="btn btn-ghost" type="button">Tutup</button>
-      </div>
-      <p id="closeHint" class="hint" hidden>Kamu bisa menutup tab ini kapan saja.</p>
+      <button id="futureBtn" class="btn btn-primary" type="button">Untuk Masa Depan Kita 🤍</button>
     </div>
   </section>
 </main>
 
+<!-- Modal 100 Alasan -->
 <div id="modal" class="modal" hidden>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
-      <h3 id="modalTitle">100 alasan</h3>
+      <h3 id="modalTitle">100 Hal Tentangmu</h3>
       <button id="modalClose" class="close" type="button" aria-label="Tutup daftar alasan">×</button>
     </div>
     <ol id="reasonList" class="reasons"></ol>
   </div>
 </div>
 
+<!-- Animasi Penutup Kelopak Bunga -->
 <div id="scene" class="scene" hidden aria-live="polite">
   <div id="petals" aria-hidden="true"></div>
   <div class="scene-msg" id="sceneMsg"></div>
