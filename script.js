@@ -344,13 +344,13 @@ function initAnswers() {
 // PASTIKAN FUNGSI INI TETAP ADA TEPAT DI BAWAH initAnswers()
 function showClosing() {
   const scene = $("scene");
-  $("sceneMsg").textContent = CONFIG.closing; // Mengambil teks dari CONFIG di atas
+  $("sceneMsg").textContent = CONFIG.closing; 
   scene.hidden = false; 
   document.body.classList.add("locked");
 
   if (reduced) return;
   const box = $("petals"), colors = ["#D8A7A7", "#B97C83", "#EDE2D5"];
-  box.innerHTML = ''; // Bersihkan kelopak sebelumnya (jika ada)
+  box.innerHTML = ''; 
 
   for (let i = 0; i < 22; i++) {                 
     const p = document.createElement("span");
@@ -360,21 +360,27 @@ function showClosing() {
   }
 }
 
+// ----- PINDAHKAN KODE OBSERVER KE SINI -----
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target); 
+    }
+  });
+}, { threshold: 0.15 });
+
+const hiddenElements = document.querySelectorAll('.fade-in-section');
+hiddenElements.forEach((el) => observer.observe(el));
+// -------------------------------------------
+
 /* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
 [initGate, initGallery, initModal, initAnswers].forEach(fn => {
   try { fn(); } catch (e) { console.error(fn.name, e); }
 });
 
- const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target); 
-      }
-    });
-  }, { threshold: 0.15 });
-
-  const hiddenElements = document.querySelectorAll('.fade-in-section');
-  hiddenElements.forEach((el) => observer.observe(el));
-
+}); // Ini adalah penutup dari document.addEventListener("DOMContentLoaded", function() { di baris paling atas
+/* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
+[initGate, initGallery, initModal, initAnswers].forEach(fn => {
+  try { fn(); } catch (e) { console.error(fn.name, e); }
 });
