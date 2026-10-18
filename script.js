@@ -47,113 +47,149 @@ document.addEventListener("DOMContentLoaded", function () {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   }
 
-  /* ===== AUTHENTICATION ===== */
-  
-const loginButton = $('loginBtn');
-const authModal = $('authModal');
+/* ===== AUTHENTICATION ===== */
 
-if (loginButton && authModal) {
-  loginButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    authModal.hidden = false;
-
-    console.log('Modal login dibuka.');
-  });
-} else {
-  console.error(
-    'Elemen loginBtn atau authModal tidak ditemukan.'
-  );
-}
-
-$('authForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value;
-  const btn = e.currentTarget.querySelector('button');
-
-  btn.textContent = 'Memverifikasi...';
-  btn.disabled = true;
-
+async function checkAuth() {
   try {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+    const {
+      data: { session },
+      error
+    } = await supabase.auth.getSession();
 
     if (error) {
-      // Tampilkan error asli di Console untuk diagnosis.
-      console.error('Supabase login error:', {
-        message: error.message,
-        code: error.code,
-        status: error.status
-      });
-
-      const details =
-        `${error.code || ''} ${error.message || ''}`
-          .toLowerCase();
-
-      let message;
-
-      if (
-        details.includes('email_not_confirmed') ||
-        details.includes('email not confirmed')
-      ) {
-        message =
-          'Email belum dikonfirmasi di Supabase.';
-      } else if (
-        details.includes('invalid login credentials')
-      ) {
-        message =
-          'Email atau password salah. Pastikan akun memiliki password Supabase yang benar.';
-      } else if (
-        details.includes('invalid api key')
-      ) {
-        message =
-          'API key ditolak. Periksa key dan project Supabase.';
-      } else {
-        message =
-          `Login gagal: ${error.message}`;
-      }
-
-      showToast(message, 'error');
+      console.error("Gagal mengecek session:", error);
       return;
     }
 
-    if (!data.user || !data.session) {
-      throw new Error(
-        'Login tidak menghasilkan session yang valid.'
-      );
+    if (session) {
+      STATE.user = session.user;
+      STATE.isCurator = true;
+
+      const curatorBadge = $("curatorBadge");
+      const titipBtn = $("titipBtn");
+      const addReasonContainer = $("addReasonContainer");
+      const loginBtn = $("loginBtn");
+
+      if (curatorBadge) {
+        curatorBadge.classList.remove("hidden");
+      }
+
+      if (titipBtn) {
+        titipBtn.classList.remove("hidden");
+      }
+
+      if (addReasonContainer) {
+        addReasonContainer.classList.remove("hidden");
+      }
+
+      if (loginBtn) {
+        loginBtn.hidden = true;
+      }
+
+      console.log("Session kurator ditemukan:", session.user.email);
+    } else {
+      STATE.user = null;
+      STATE.isCurator = false;
+
+      console.log("Tidak ada session aktif.");
     }
 
-    // Simpan status pengguna yang berhasil login.
-    STATE.user = data.user;
-    STATE.isCurator = true;
-
-    $('curatorBadge').classList.remove('hidden');
-    $('titipBtn').classList.remove('hidden');
-    $('addReasonContainer').classList.remove('hidden');
-    $('loginBtn').hidden = true;
-    $('authModal').hidden = true;
-
-    showToast('Login berhasil. Selamat datang kembali!');
-
-    await loadMemories();
-
   } catch (err) {
-    console.error('Login exception:', err);
-
-    showToast(
-      `Terjadi kesalahan: ${err.message || 'Periksa koneksi dan Console.'}`,
-      'error'
-    );
-  } finally {
-    btn.textContent = 'Masuk';
-    btn.disabled = false;
+    console.error("checkAuth error:", err);
   }
-});
+}
 
+
+/* ===== BUKA MODAL LOGIN ===== */
+
+const loginButton = $("loginBtn");
+const authModal = $("authModal");
+
+if (loginButton && authModal) {
+  loginButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    authModal.hidden = false;
+  });
+}
+
+
+/* ===== PROSES LOGIN ===== */
+
+const authForm = $("authForm");
+
+if (authForm) {
+  authForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+    const btn = e.currentTarget.querySelector("button");
+
+    btn.textContent = "Memverifikasi...";
+    btn.disabled = true;
+
+    try {
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+      if (error) {
+        console.error("Supabase Login Error:", error);
+
+        showToast(
+          `Login gagal: ${error.message}`,
+          "error"
+        );
+
+        return;
+      }
+
+      if (!data.session || !data.user) {
+        throw new Error("Session login tidak ditemukan.");
+      }
+
+      /* Simpan user */
+      STATE.user = data.user;
+      STATE.isCurator = true;
+
+      /* Aktifkan mode kurator */
+      $("curatorBadge")?.classList.remove("hidden");
+      $("titipBtn")?.classList.remove("hidden");
+      $("addReasonContainer")?.classList.remove("hidden");
+
+      /* Sembunyikan tombol login */
+      if ($("loginBtn")) {
+        $("loginBtn").hidden = true;
+      }
+
+      /* Tutup modal */
+      $("authModal").hidden = true;
+
+      showToast("Selamat datang kembali, Kurator!");
+
+      /* Refresh data */
+      await loadMemories();
+      await loadThings();
+
+    } catch (err) {
+
+      console.error("Login Exception:", err);
+
+      showToast(
+        `Terjadi kesalahan: ${err.message}`,
+        "error"
+      );
+
+    } finally {
+
+      btn.textContent = "Masuk";
+      btn.disabled = false;
+
+    }
+  });
+}
   /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
     const btn = $("openBtn");
@@ -456,20 +492,43 @@ $('authForm').addEventListener('submit', async (e) => {
     }
   }
 
-  /* ===== OBSERVER & INIT ===== */
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target); 
-      }
-    });
-  }, { threshold: 0.15 });
+ /* ===== OBSERVER & INIT ===== */
 
-  document.querySelectorAll('.fade-in-section').forEach((el) => observer.observe(el));
+const observer = new IntersectionObserver((entries) => {
 
-  checkAuth().finally(() => {
+  entries.forEach((entry) => {
+
+    if (entry.isIntersecting) {
+
+      entry.target.classList.add("is-visible");
+
+      observer.unobserve(entry.target);
+
+    }
+
+  });
+
+}, {
+  threshold: 0.15
+});
+
+
+document
+  .querySelectorAll(".fade-in-section")
+  .forEach((el) => observer.observe(el));
+
+
+/* ===== START WEBSITE ===== */
+
+checkAuth()
+  .catch((err) => {
+    console.error("Auth initialization error:", err);
+  })
+  .finally(() => {
+
     initGate();
     initFuture();
+
   });
+
 });
