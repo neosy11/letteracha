@@ -5,6 +5,7 @@
  - memories                 : foto di assets/images/ (memory-1.jpg ... memory-4.jpg), judul, tanggal, caption
  - reasons                  : daftar alasan; kata "Karena " ditambahkan otomatis (reasonPrefix)
  - closing/decline          : pesan penutup */
+document.addEventListener("DOMContentLoaded", function() {
 const CONFIG = {
   senderName: "[Ahmad Syauqi]",
   partnerName: "[Annisa Safina]",
@@ -313,4 +314,18 @@ function showClosing() {
 /* ===== Init (tiap fitur terisolasi agar satu error tidak menghentikan yang lain) ===== */
 [initGate, initGallery, initModal, initAnswers].forEach(fn => {
   try { fn(); } catch (e) { console.error(fn.name, e); }
+});
+
+ const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target); 
+      }
+    });
+  }, { threshold: 0.15 });
+
+  const hiddenElements = document.querySelectorAll('.fade-in-section');
+  hiddenElements.forEach((el) => observer.observe(el));
+
 });
