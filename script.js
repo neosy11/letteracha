@@ -468,7 +468,7 @@ $('authForm').addEventListener('submit', async (e) => {
 
   document.querySelectorAll('.fade-in-section').forEach((el) => observer.observe(el));
 
-  checkAuth().then(() => {
+  checkAuth().finally(() => {
     initGate();
     initFuture();
   });
