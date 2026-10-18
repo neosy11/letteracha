@@ -413,7 +413,14 @@ async function checkAuth() {
       }
 
       const { error: insertError } = await supabase.from('memories').insert([
-        { title, date, description, category, image_url: imageUrl, user_id: STATE.user.id }
+        {
+        title,
+        date,
+        description: desc,
+        category,
+        image_url: imageUrl,
+        user_id: STATE.user.id
+        }
       ]);
 
       if (insertError) throw insertError;
