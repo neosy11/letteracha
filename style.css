@@ -1,99 +1,100 @@
-:root{--white:#FAF7F2;--beige:#EDE2D5;--pink:#D8A7A7;--rose:#B97C83;--brown:#4B3832;--char:#292626;
---serif:'Playfair Display',Georgia,serif;--lora:'Lora',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif}
+:root{
+  /* Palet warna ala Museum / Art Gallery */
+  --bg-color:#F4F1EA; /* Putih tulang kusam */
+  --text-main:#2C2A29; /* Hitam arang */
+  --text-muted:#5E5955;
+  --accent:#8C7355; /* Coklat perunggu */
+  --highlight:#D9C5B2;
+  
+  --serif:'Playfair Display',Georgia,serif;
+  --lora:'Lora',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif
+}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
-body{background:var(--white);color:var(--brown);font:400 1rem/1.7 var(--sans);overflow-x:hidden}
+body{background:var(--bg-color);color:var(--text-main);font:400 1rem/1.7 var(--sans);overflow-x:hidden}
 body.locked{overflow:hidden}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:90;
+
+/* Tekstur kanvas tipis di background */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.03;z-index:90;
 background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.8' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>")}
-:focus-visible{outline:3px solid var(--rose);outline-offset:3px}
+
 [hidden]{display:none!important}
 
-.btn{font:500 1rem var(--sans);min-height:48px;padding:.8rem 1.6rem;border-radius:999px;border:1.5px solid var(--rose);cursor:pointer;transition:transform .3s,background .3s,color .3s}
-.btn-primary{background:var(--rose);color:var(--white)}
-.btn-primary:hover{background:var(--brown);border-color:var(--brown)}
-.btn-ghost{background:transparent;color:var(--brown)}
-.btn-ghost:hover{background:var(--beige)}
-.btn:disabled{opacity:.6;cursor:default}
+.btn{font:500 1rem var(--sans);min-height:48px;padding:.8rem 1.6rem;border-radius:2px;border:1px solid var(--accent);cursor:pointer;transition:all .3s; letter-spacing: 1px;}
+.btn-primary{background:var(--accent);color:var(--bg-color)}
+.btn-primary:hover{background:var(--text-main);border-color:var(--text-main)}
+.btn-ghost{background:transparent;color:var(--text-main)}
+.btn-ghost:hover{background:var(--highlight)}
 
-.gate{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;text-align:center;background:var(--char);color:var(--beige);transition:opacity .9s ease}
+/* Gate (Pintu Masuk Pameran) */
+.gate{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;text-align:center;background:#1A1918;color:var(--bg-color);transition:opacity 1.5s ease}
 .gate.out{opacity:0;pointer-events:none}
-.gate-note{font:italic 1.25rem var(--lora);letter-spacing:.02em}
-.glow{position:absolute;width:min(70vw,420px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(216,167,167,.28),transparent 68%);animation:breathe 7s ease-in-out infinite}
-.gate .btn{position:relative}
-@keyframes breathe{50%{transform:scale(1.15);opacity:.7}}
+.gate-note{font:italic 1.5rem var(--lora);letter-spacing:.05em; color: #D9C5B2;}
 
-.sec{min-height:100svh;padding:4rem 1.25rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.75rem;text-align:center}
-.display{font:500 clamp(1.7rem,6vw,3rem)/1.25 var(--serif);max-width:20ch;color:var(--brown)}
-.hint{font-size:.9rem;color:var(--rose)}
+.sec{min-height:100svh;padding:6rem 1.25rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;text-align:center}
+.display{font:400 clamp(2rem,6vw,3.5rem)/1.2 var(--serif);max-width:22ch;color:var(--text-main); letter-spacing: 1px;}
+.hint{font-size:.9rem;color:var(--text-muted); font-style: italic;}
 
-.music{position:fixed;top:1rem;right:1rem;z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid var(--pink);background:var(--white);color:var(--rose);font-size:1.2rem;cursor:pointer;box-shadow:0 2px 8px rgba(75,56,50,.12)}
-.music.paused{opacity:.55;text-decoration:line-through}
+.music{position:fixed;top:1.5rem;right:1.5rem;z-index:40;width:40px;height:40px;border-radius:50%;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:1.2rem;cursor:pointer; transition: 0.3s;}
+.music:hover {background: var(--accent); color: var(--bg-color);}
+.music.paused{opacity:.5;text-decoration:line-through}
 
-.fade-in-section {
-  opacity: 0;
-  transform: translateY(30px); 
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  will-change: opacity, transform;
-}
+.fade-in-section {opacity: 0;transform: translateY(40px); transition: opacity 1s ease-out, transform 1s ease-out;will-change: opacity, transform;}
+.fade-in-section.is-visible {opacity: 1;transform: none;}
 
-/* Keadaan akhir (saat masuk layar): Muncul dan naik ke posisi asli */
-.fade-in-section.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-.letter-sec .display{max-width:24ch}
-.paper{width:min(100%,38rem);background:#fffdf9;padding:clamp(1.5rem,5vw,3rem);text-align:left;border-radius:4px;box-shadow:0 1px 3px rgba(75,56,50,.15),0 12px 30px -12px rgba(75,56,50,.2);font:400 1.1rem/1.95 var(--lora);transform:rotate(-.4deg)}
+/* Plakat Museum (Pengganti Surat) */
+.paper{width:min(100%,40rem);background:transparent;padding:clamp(1.5rem,5vw,2rem) 0;text-align:center; font:400 1.15rem/2.2 var(--lora); color: var(--text-main);}
 .letter-text{white-space:pre-wrap;display:inline}
-.cursor{display:inline-block;width:2px;height:1.1em;margin-left:2px;vertical-align:text-bottom;background:var(--rose);animation:blink 1s steps(2) infinite}
+.cursor{display:inline-block;width:2px;height:1.1em;margin-left:2px;vertical-align:text-bottom;background:var(--accent);animation:blink 1s steps(2) infinite}
 .cursor.done{display:none}
 @keyframes blink{50%{opacity:0}}
-.signature{margin-top:1.5rem;font-style:italic;color:var(--rose);white-space:pre-line;opacity:0;transition:opacity 1s}
+.signature{margin-top:2rem;font-style:italic;color:var(--text-muted);white-space:pre-line;opacity:0;transition:opacity 1s; font-size: 1rem;}
 .signature.show{opacity:1}
 
-.capsule-sec{background:var(--beige)}
-.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:min(100%,64rem)}
-.card{position:relative;display:flex;flex-direction:column;background:#fff;border:0;padding:.6rem .6rem 0;text-align:left;cursor:pointer;border-radius:3px;box-shadow:0 8px 20px -10px rgba(75,56,50,.35);font:inherit;color:inherit;transition:transform .4s}
-.card:nth-child(odd){transform:rotate(-1.5deg)}.card:nth-child(even){transform:rotate(1.5deg)}
-.card:hover{transform:rotate(0) translateY(-3px)}
-.photo{position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(135deg,var(--pink),var(--beige))}
-.photo img{width:100%;height:100%;object-fit:cover;display:block;filter:blur(18px) saturate(.6);transform:scale(1.15);transition:filter 1.2s,transform 1.2s}
-.card.open .photo img{filter:none;transform:none}
-.card.nophoto img{display:none}
-.card.nophoto .photo::after{content:"foto belum diganti";position:absolute;inset:0;display:grid;place-items:center;font:italic .9rem var(--lora);color:var(--brown)}
-.card.nophoto:not(.open) .photo::after{opacity:0}
-.label{padding:.7rem .3rem;font:500 .95rem var(--serif)}
-.meta{max-height:0;overflow:hidden;opacity:0;padding:0 .3rem;font-size:.85rem;line-height:1.5;transition:max-height .6s,opacity .6s,padding .6s}
-.card.open .meta{max-height:14rem;opacity:1;padding-bottom:.8rem}
-.meta time{display:block;color:var(--rose);margin-bottom:.2rem}
+/* Galeri Lukisan */
+.capsule-sec{background:#EBE6DD; border-top: 1px solid #D9C5B2; border-bottom: 1px solid #D9C5B2;}
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;width:min(100%,68rem); padding-top: 2rem;}
+.card{position:relative;display:flex;flex-direction:column;background:var(--bg-color);border:0;padding:1rem;text-align:center;cursor:pointer; box-shadow: 0 15px 35px -15px rgba(0,0,0,0.2); transition: transform .4s, box-shadow .4s;}
+.card:hover{transform:translateY(-5px); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3);}
+.photo{position:relative;aspect-ratio:4/5;overflow:hidden;background:#D9C5B2;}
+.photo img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(30%) sepia(20%); transition: filter 0.8s, transform 0.8s;}
+.card:hover .photo img, .card.open .photo img {filter: grayscale(0%) sepia(0%); transform: scale(1.03);}
+.label{padding-top:1.2rem;font:500 1.1rem var(--serif); letter-spacing: 0.5px;}
+.meta{max-height:0;overflow:hidden;opacity:0; font-size:.9rem;line-height:1.6;transition:max-height .6s,opacity .6s,padding .6s; color: var(--text-muted); font-family: var(--lora); font-style: italic;}
+.card.open .meta{max-height:15rem;opacity:1;padding-top: 1rem;}
+.meta time{display:block;color:var(--accent); font-weight: bold; margin-bottom:.3rem; font-style: normal; font-family: var(--sans);}
 
-.little-sec .btn{max-width:22rem}
+/* Modal 100 Hal */
+.modal{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(26,25,24,.8);backdrop-filter: blur(5px); animation:fade .4s}
+.modal-box{width:min(100%,40rem);max-height:min(85dvh,45rem);display:flex;flex-direction:column;background:var(--bg-color); border: 4px solid var(--accent); box-shadow:0 25px 50px rgba(0,0,0,.5);animation:rise .5s cubic-bezier(0.2, 0.8, 0.2, 1)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid var(--highlight)}
+.modal-head h3{font:400 1.5rem var(--serif); letter-spacing: 1px;}
+.close{width:44px;height:44px;border:0;background:none;font-size:2rem;color:var(--text-main);cursor:pointer; transition: color 0.2s;}
+.close:hover {color: var(--accent);}
+.reasons{overflow-y:auto;padding:1.5rem 2rem 2rem 3.5rem; font-family: var(--lora); font-size: 1.1rem; line-height: 1.8;}
+.reasons li{padding:.6rem 0;border-bottom:1px solid rgba(217, 197, 178, 0.3);}
+.reasons li::marker{color:var(--accent); font-weight: bold;}
 
-.modal{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(41,38,38,.6);animation:fade .35s}
-.modal-box{width:min(100%,34rem);max-height:min(85dvh,42rem);display:flex;flex-direction:column;background:var(--white);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:rise .4s ease}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--beige)}
-.modal-head h3{font:500 1.3rem var(--serif)}
-.close{width:44px;height:44px;border:0;background:none;font-size:1.8rem;color:var(--rose);cursor:pointer}
-.reasons{overflow-y:auto;padding:1rem 1.25rem 1.5rem 3rem;overscroll-behavior:contain}
-.reasons li{padding:.45rem 0;border-bottom:1px solid var(--beige)}
-.reasons li::marker{color:var(--rose);font-size:.85rem}
 @keyframes fade{from{opacity:0}}
-@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}}
 
-.final-sec{background:linear-gradient(var(--white),var(--beige) 40%,var(--pink) 160%)}
-.final-text{font:400 1.2rem/1.8 var(--lora);max-width:32rem}
-.final-q{font:500 clamp(1.3rem,4.5vw,1.9rem)/1.4 var(--serif);max-width:26rem}
-.answers{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;margin-top:.5rem}
-.nudge:hover{transform:translate(6px,-3px) rotate(2deg)}
-.nudge:active{transform:translateX(-4px)}
-.decline{max-width:28rem;padding:1.5rem;border-radius:10px;background:#fffdf9;font:400 1.05rem/1.7 var(--lora);animation:rise .5s}
+.final-sec{background: var(--bg-color);}
+.final-text{font:400 1.2rem/2 var(--lora);max-width:36rem; color: var(--text-muted);}
+.final-q{font:400 clamp(1.5rem,4.5vw,2rem)/1.4 var(--serif);max-width:30rem; margin-bottom: 1rem;}
 
-.scene{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(250,247,242,.96);animation:fade 1.2s;overflow:hidden}
-.scene-msg{max-width:30rem;text-align:center;font:400 1.2rem/1.9 var(--lora);white-space:pre-line;opacity:0;animation:show 2.5s 1s forwards;position:relative}
+/* Scene Penutup (Cahaya Hangat) */
+.scene{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--bg-color);animation:fade 1.5s;overflow:hidden}
+.scene-msg{max-width:35rem;text-align:center;font:400 1.3rem/2 var(--lora);white-space:pre-line;opacity:0;animation:show 3s 1s forwards;position:relative; z-index: 2;}
 @keyframes show{to{opacity:1}}
-.petal{position:absolute;top:-30px;width:12px;height:16px;border-radius:70% 0 70% 0;background:var(--pink);opacity:.8;animation:fall linear infinite}
-@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(540deg)}}
 
-@media(min-width:768px){.gallery{grid-template-columns:repeat(4,1fr);gap:1.5rem}.sec{padding:6rem 2rem}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.petal{display:none}}
+/* Efek debu bercahaya (seperti lampu sorot museum) */
+.dust{position:absolute;width:4px;height:4px;border-radius:50%;background:#D9C5B2;box-shadow: 0 0 10px 2px #D9C5B2; opacity:0;animation:floatDust linear infinite}
+@keyframes floatDust{
+  0%{opacity: 0; transform: translateY(100vh) scale(0.5);}
+  50%{opacity: 0.6;}
+  100%{opacity: 0; transform: translateY(-10vh) scale(1.2);}
+}
+
+@media(min-width:768px){.gallery{grid-template-columns:repeat(4,1fr);gap:2.5rem}.sec{padding:8rem 2rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}.dust{display:none}}
