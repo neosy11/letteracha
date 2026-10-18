@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   /* ===== KONFIGURASI SUPABASE ===== */
-  // MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI
   const SUPABASE_URL = 'https://hggbpvgyvtoxlfsgglom.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZ2Jwdmd5dnRveGxmc2dnbG9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDAzMDAsImV4cCI6MjEwNzg3NjMwMH0.OqF6TqPvKLejLMYWBkwYhAif_SB4On9ID216YR6TC_Q';
+  const SUPABASE_ANON_KEY = 'sb_publishable_aiDfBiLS7UuszHRyt_A_2rurM';
   
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -14,8 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
     isCurator: false
   };
 
+  const CURATOR_EMAILS = [
+    "achacantik@gmail.com",
+    "neolycant@gmail.com"
+  ];
+
   const CONFIG = {
-    senderName: "Ahmad Syauqi",
+    senderName: "Kurator Museum",
     typeSpeedMs: 40,
     apologyLetter: `Selamat datang di tempat di mana waktu berhenti sejenak.\n\nTempat ini dibangun bukan untuk mengingat satu hari tertentu, melainkan untuk menyimpan jejak dari setiap langkah yang kita ambil bersama. Dari tawa yang tak sengaja terekam, hingga keheningan yang nyaman saat kita berdua.\n\nMungkin akan ada masa di mana kita lupa, lelah, atau tersesat dalam rutinitas. Saat hari itu tiba, aku harap museum ini bisa menjadi tempat kita pulang—untuk mengingatkan kembali bagaimana semua ini dimulai, dan mengapa kita memilih untuk terus bertahan.\n\nSilakan berkeliling. Ruangan ini adalah milikmu, sama seperti hatiku.`,
     closing: `Terima kasih atas kunjungannya.\nMuseum ini akan selalu terbuka untukmu.\n\nI love you.`
@@ -27,12 +31,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showToast(message, type = 'success') {
     const container = $('toastContainer');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
     container.appendChild(toast);
     
-    // Trigger reflow
     void toast.offsetWidth;
     toast.classList.add('show');
 
@@ -47,248 +51,89 @@ document.addEventListener("DOMContentLoaded", function () {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   }
 
-/* ===== AUTHENTICATION ===== */
-
-async function checkAuth() {
-  try {
-    const {
-      data: { session },
-      error
-    } = await supabase.auth.getSession();
-
-    if (error) {
-      console.error("Gagal mengecek session:", error);
-      return;
-    }
-
-    const curatorBadge = $("curatorBadge");
-    const titipBtn = $("titipBtn");
-    const addReasonContainer = $("addReasonContainer");
-    const loginBtn = $("loginBtn");
-
-    if (session?.user) {
-      STATE.user = session.user;
-
-      const email = (session.user.email || "").trim().toLowerCase();
-
-      STATE.isCurator = CURATOR_EMAILS.includes(email);
-
-      console.log(
-        STATE.isCurator
-          ? `Session curator ditemukan: ${email}`
-          : `User biasa ditemukan: ${email}`
-      );
-
-      // Badge curator
-      if (curatorBadge) {
-        curatorBadge.classList.toggle(
-          "hidden",
-          !STATE.isCurator
-        );
-      }
-
-      // Tombol tambah kenangan
-      if (titipBtn) {
-        titipBtn.classList.toggle(
-          "hidden",
-          !STATE.isCurator
-        );
-      }
-
-      // Tombol tambah "100 Hal"
-      if (addReasonContainer) {
-        addReasonContainer.classList.toggle(
-          "hidden",
-          !STATE.isCurator
-        );
-      }
-
-      // Tombol login
-      if (loginBtn) {
-        loginBtn.hidden = true;
-      }
-
-    } else {
-      STATE.user = null;
-      STATE.isCurator = false;
-
-      if (curatorBadge) {
-        curatorBadge.classList.add("hidden");
-      }
-
-      if (titipBtn) {
-        titipBtn.classList.add("hidden");
-      }
-
-      if (addReasonContainer) {
-        addReasonContainer.classList.add("hidden");
-      }
-
-      if (loginBtn) {
-        loginBtn.hidden = false;
-      }
-
-      console.log("Tidak ada session aktif.");
-    }
-
-  } catch (err) {
-    console.error("checkAuth error:", err);
-  }
-}
-
-/* ===== BUKA MODAL LOGIN ===== */
-
-const loginButton = $("loginBtn");
-const authModal = $("authModal");
-
-if (loginButton && authModal) {
-  loginButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    authModal.hidden = false;
-  });
-}
-
-
-/* ===== PROSES LOGIN ===== */
-
-const authForm = $("authForm");
-
-if (authForm) {
-  authForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const email = $("authEmail").value.trim();
-    const password = $("authPassword").value;
-    const btn = e.currentTarget.querySelector("button");
-
-    btn.textContent = "Memverifikasi...";
-    btn.disabled = true;
-
+  /* ===== AUTHENTICATION ===== */
+  async function checkAuth() {
     try {
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
+      const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
-        console.error("Supabase Login Error:", error);
-
-        showToast(
-          `Login gagal: ${error.message}`,
-          "error"
-        );
-
+        console.error("Gagal mengecek session:", error);
         return;
       }
 
-      if (!data.session || !data.user) {
-        throw new Error("Session login tidak ditemukan.");
+      const curatorBadge = $("curatorBadge");
+      const titipBtn = $("titipBtn");
+      const addReasonContainer = $("addReasonContainer");
+      const loginBtn = $("loginBtn");
+
+      if (session?.user) {
+        STATE.user = session.user;
+        const email = (session.user.email || "").trim().toLowerCase();
+        STATE.isCurator = CURATOR_EMAILS.includes(email);
+
+        if (curatorBadge) curatorBadge.classList.toggle("hidden", !STATE.isCurator);
+        if (titipBtn) titipBtn.classList.toggle("hidden", !STATE.isCurator);
+        if (addReasonContainer) addReasonContainer.classList.toggle("hidden", !STATE.isCurator);
+        if (loginBtn) loginBtn.hidden = true;
+      } else {
+        STATE.user = null;
+        STATE.isCurator = false;
+        if (curatorBadge) curatorBadge.classList.add("hidden");
+        if (titipBtn) titipBtn.classList.add("hidden");
+        if (addReasonContainer) addReasonContainer.classList.add("hidden");
+        if (loginBtn) loginBtn.hidden = false;
       }
-
-      /* Simpan user */
-      STATE.user = data.user;
-      STATE.isCurator = true;
-
-      /* Aktifkan mode kurator */
-      $("curatorBadge")?.classList.remove("hidden");
-      $("titipBtn")?.classList.remove("hidden");
-      $("addReasonContainer")?.classList.remove("hidden");
-
-      /* Sembunyikan tombol login */
-      if ($("loginBtn")) {
-        $("loginBtn").hidden = true;
-      }
-
-      /* Tutup modal */
-      $("authModal").hidden = true;
-
-      showToast("Selamat datang kembali, Kurator!");
-
-      /* Refresh data */
-      await loadMemories();
-      await loadThings();
-
     } catch (err) {
-
-      console.error("Login Exception:", err);
-
-      showToast(
-        `Terjadi kesalahan: ${err.message}`,
-        "error"
-      );
-
-    } finally {
-
-      btn.textContent = "Masuk";
-      btn.disabled = false;
-
+      console.error("checkAuth error:", err);
     }
-  });
-}
+  }
 
-/* ===== MUSEUM SECTION NAVIGATION ===== */
-
-function initMuseumNavigation() {
-  const nav = $("museumNav");
-
-  if (!nav) return;
-
-  const buttons = nav.querySelectorAll("[data-target]");
-  const sections = Array.from(
-    document.querySelectorAll(".fade-in-section")
-  );
-
-  // Klik navigasi
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const targetId = button.dataset.target;
-      const target = $(targetId);
-
-      if (!target) return;
-
-      target.scrollIntoView({
-        behavior: reduced ? "auto" : "smooth",
-        block: "start"
-      });
-    });
+  $('loginBtn').addEventListener('click', () => {$('authModal').hidden = false; });
+  document.querySelectorAll('.close-auth-modal').forEach(btn => {
+    btn.addEventListener('click', () => $('authModal').hidden = true);
   });
 
-  // Menentukan menu aktif berdasarkan posisi section
-  if (!("IntersectionObserver" in window)) return;
+  $('authForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('authEmail').value;
+    const password = $('authPassword').value;
+    const btn = e.target.querySelector('button');
+    btn.textContent = 'Memverifikasi...';
+    btn.disabled = true;
 
-  const navObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      showToast('Akses ditolak. Kredensial tidak valid.', 'error');
+    } else {
+      STATE.user = data.user;
+      const loggedEmail = (data.user.email || "").trim().toLowerCase();
+      STATE.isCurator = CURATOR_EMAILS.includes(loggedEmail);
 
-        const id = entry.target.id;
+      $("curatorBadge")?.classList.toggle("hidden", !STATE.isCurator);
+      $("titipBtn")?.classList.toggle("hidden", !STATE.isCurator);
+      $("addReasonContainer")?.classList.toggle("hidden", !STATE.isCurator);
+      if ($('loginBtn'))$('loginBtn').hidden = true;
 
-        buttons.forEach((button) => {
-          button.classList.toggle(
-            "active",
-            button.dataset.target === id
-          );
-        });
-      });
-    },
-    {
-      root: null,
-      threshold: 0.45
+      showToast(STATE.isCurator ? "Selamat datang kembali, Kurator!" : "Berhasil masuk ke museum.");
+      $('authModal').hidden = true;
+      $('authForm').reset();
+      await loadMemories();
     }
-  );
-
-  sections.forEach((section) => {
-    navObserver.observe(section);
+    btn.textContent = 'Masuk';
+    btn.disabled = false;
   });
-}
+
   /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
     const btn = $("openBtn");
     let busy = false;
     btn.addEventListener("click", () => {
       if (busy) return;
-      busy = true; btn.disabled = true;
+      busy = true; 
+      btn.textContent = "Membuka Pintu...";
+      btn.disabled = true;
+      
       $("main").hidden = false;
       $("gate").classList.add("out");
       setTimeout(() => {
@@ -297,7 +142,7 @@ function initMuseumNavigation() {
         initLetterObserver();
         loadMemories();
         loadThings();
-      }, reduced ? 50 : 1500);
+      }, 1500);
     });
   }
 
@@ -367,7 +212,6 @@ function initMuseumNavigation() {
       const photo = document.createElement("div"); photo.className = "photo";
       const img = document.createElement("img");
       
-      // Handle Image Fetching from Supabase Storage
       const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(m.image_url);
       img.src = m.image_url ? publicUrlData.publicUrl : ''; 
       img.alt = `Arsip: ${m.title}`; img.loading = "lazy";
@@ -393,7 +237,6 @@ function initMuseumNavigation() {
     });
   }
 
-  // Pencarian (Search)
   $('searchInput').addEventListener('input', (e) => {
     const keyword = e.target.value.toLowerCase();
     const filtered = STATE.memories.filter(m => 
@@ -404,9 +247,8 @@ function initMuseumNavigation() {
     renderGallery(filtered);
   });
 
-  // Modal Penambahan Kenangan
   $('titipBtn').addEventListener('click', () => {
-    if (!STATE.isCurator) return showToast('Hanya Kurator yang dapat menambah koleksi.', 'error');
+    if (!STATE.isCurator) return showToast('Hanya Kurator resmi yang dapat menambah koleksi.', 'error');
     $('memoryModal').hidden = false;
   });
 
@@ -414,7 +256,6 @@ function initMuseumNavigation() {
     btn.addEventListener('click', () => { $('memoryModal').hidden = true; $('memoryForm').reset();$('imagePreview').style.display = 'none'; });
   });
 
-  // Image Preview
   $('memImage').addEventListener('change', function() {
     const file = this.files[0];
     if (file) {
@@ -426,18 +267,29 @@ function initMuseumNavigation() {
     }
   });
 
-  // Submit Kenangan Baru
   $('memoryForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (!STATE.user || !STATE.isCurator) {
+      showToast("Hanya dua curator resmi yang dapat mengabadikan kenangan.", "error");
+      return;
+    }
+
     const btn = $('saveMemoryBtn');
-    btn.textContent = 'Menyimpan ke Arsip...'; btn.disabled = true;
+    btn.textContent = 'Menyimpan ke Arsip...'; 
+    btn.disabled = true;
 
     try {
-      const title = $('memTitle').value;
+      const title = $('memTitle').value.trim();
       const date = $('memDate').value;
-      const desc = $('memDesc').value;
+      const desc = $('memDesc').value.trim();
       const category = $('memCat').value;
       const file = $('memImage').files[0];
+
+      if (!title || !date || !desc || !category) {
+        showToast("Lengkapi semua informasi kenangan.", "error");
+        return;
+      }
       
       let imageUrl = '';
 
@@ -452,36 +304,26 @@ function initMuseumNavigation() {
       }
 
       const { error: insertError } = await supabase.from('memories').insert([
-        {
-        title,
-        date,
-        description: desc,
-        category,
-        image_url: imageUrl,
-        user_id: STATE.user.id
-        }
+        { title, date, description: desc, category, image_url: imageUrl, user_id: STATE.user.id }
       ]);
 
       if (insertError) throw insertError;
 
       showToast('Kenangan berhasil diabadikan.');
       $('memoryModal').hidden = true;
-      $('memoryForm').reset();$('imagePreview').style.display = 'none';
-      loadMemories(); // Refresh grid
+      $('memoryForm').reset();
+      if ($('imagePreview'))$('imagePreview').style.display = 'none';
+      await loadMemories();
 
-   
     } catch (err) {
       console.error("Gagal menyimpan kenangan:", err);
-
-      showToast(
-        'Gagal: ' + (err?.message || "Kesalahan sistem"),
-        'error'
-      );
+      showToast('Gagal: ' + (err?.message || "Kesalahan sistem"), 'error');
     } finally {
-      btn.textContent = 'Simpan ke Database';
+      btn.textContent = 'Simpan ke Database'; 
       btn.disabled = false;
     }
   });
+
 
   /* ===== 04 KOLEKSI 100 HAL (THINGS ABOUT US) ===== */
   async function loadThings() {
@@ -510,7 +352,7 @@ function initMuseumNavigation() {
       check.type = "checkbox";
       check.className = "reason-check";
       check.checked = thing.is_completed;
-      check.disabled = !STATE.isCurator; // Only curator can check off items
+      check.disabled = !STATE.isCurator;
       
       check.addEventListener('change', async (e) => {
         if (!STATE.isCurator) return;
@@ -532,16 +374,16 @@ function initMuseumNavigation() {
   }
 
   function updateProgress() {
-    const total = Math.max(STATE.things.length, 100); // Base target is 100
+    const total = Math.max(STATE.things.length, 100);
     const completed = STATE.things.filter(t => t.is_completed).length;
     const percentage = Math.min((completed / total) * 100, 100);
     
-    $('reasonsProgress').style.width = `${percentage}%`;
-    $('progressText').textContent = `${completed} dari 100 momen telah terkumpul`;
+    if ($('reasonsProgress'))$('reasonsProgress').style.width = `${percentage}%`;
+    if ($('progressText'))$('progressText').textContent = `${completed} dari 100 momen telah terkumpul`;
   }
 
-  // Tambah Hal Baru
   $('saveReasonBtn').addEventListener('click', async () => {
+    if (!STATE.isCurator) return showToast("Hanya kurator yang dapat menambah hal baru.", "error");
     const input = $('newReasonInput');
     const content = input.value.trim();
     if (!content) return;
@@ -559,15 +401,14 @@ function initMuseumNavigation() {
     btn.disabled = false;
   });
 
-  // Modal 100 Hal Setup
   const modal = $("modal"), openBtn = $("reasonsBtn");
   document.querySelectorAll('.close-modal').forEach(btn => {
     btn.addEventListener('click', () => modal.hidden = true);
   });
-  openBtn.addEventListener("click", () => { modal.hidden = false; });
+  if (openBtn) openBtn.addEventListener("click", () => { modal.hidden = false; });
 
 
-  /* ===== 05 FINAL SCENE (DEBU CAHAYA) ===== */
+  /* ===== 05 FINAL SCENE ===== */
   function initFuture() {
     $("futureBtn").addEventListener("click", showClosing);
   }
@@ -596,44 +437,19 @@ function initMuseumNavigation() {
     }
   }
 
- /* ===== OBSERVER & INIT ===== */
+  /* ===== OBSERVER & INIT ===== */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target); 
+      }
+    });
+  }, { threshold: 0.15 });
 
-const observer = new IntersectionObserver((entries) => {
+  document.querySelectorAll('.fade-in-section').forEach((el) => observer.observe(el));
 
-  entries.forEach((entry) => {
-
-    if (entry.isIntersecting) {
-
-      entry.target.classList.add("is-visible");
-
-      observer.unobserve(entry.target);
-
-    }
-
-  });
-
-}, {
-  threshold: 0.15
-});
-
-
-document
-  .querySelectorAll(".fade-in-section")
-  .forEach((el) => observer.observe(el));
-
-
-/* ===== START WEBSITE ===== */
-
-checkAuth()
-  .catch((err) => {
-    console.error("Auth initialization error:", err);
-  })
-  .finally(() => {
-
-    initGate();
-    initFuture();
-    initMuseumNavigation();
-
-});
-
+  initGate();
+  initFuture();
+  checkAuth();
 });
