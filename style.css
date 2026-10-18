@@ -43,6 +43,97 @@ body::after {
 /* Navigation & Layout */
 .museum-nav { position: fixed; top: 0; width: 100%; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; z-index: 40; pointer-events: none; }
 .nav-brand { font: 600 1.2rem var(--serif); color: var(--text-main); letter-spacing: 1px; }
+/* ===== MUSEUM NAVIGATION ===== */
+
+.museum-nav {
+  pointer-events: auto;
+}
+
+.museum-nav-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  background: rgba(247, 242, 232, 0.88);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(52, 40, 33, 0.08);
+}
+
+.museum-nav-center button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font: 500 0.78rem var(--sans);
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.museum-nav-center button:hover {
+  color: var(--text-main);
+  background: var(--bg-alt);
+}
+
+.museum-nav-center button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.museum-nav-center button:active {
+  transform: scale(0.96);
+}
+
+/* Mobile Navigation */
+
+@media (max-width: 767px) {
+
+  .museum-nav {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .museum-nav-center {
+    position: static;
+    order: 3;
+    width: 100%;
+    transform: none;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+    padding: 0.25rem;
+  }
+
+  .museum-nav-center::-webkit-scrollbar {
+    display: none;
+  }
+
+  .museum-nav-center button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.72rem;
+  }
+
+  .nav-brand {
+    font-size: 1.05rem;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+  }
+}
 .badge { background: var(--text-main); color: var(--bg-color); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
 
 .sec { min-height: 100svh; padding: 6rem 1.25rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; text-align: center; }
