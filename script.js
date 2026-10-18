@@ -317,6 +317,21 @@ function showClosing() {
   }
 }
 
+function finishLetter() {
+  clearTimeout(typeTimer);
+  $("letterText").textContent = CONFIG.apologyLetter;
+  $("cursor").classList.add("done");
+  const sig = $("signature");
+  sig.textContent = `${CONFIG.signatureLead}\n${CONFIG.senderName}`;
+  sig.classList.add("show");
+  
+  // -- KODE EASTER EGG --
+  sig.style.cursor = "pointer";
+  sig.addEventListener("click", () => {
+    alert("Rahasia Kurator: Aku selalu jatuh cinta padamu, setiap hari. 🤍");
+  }, { once: true }); // { once: true } memastikan pesan hanya muncul 1 kali
+}
+
 /* ===== Observer ===== */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
