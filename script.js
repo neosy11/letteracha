@@ -287,8 +287,11 @@ function initAnswers() {
   const yesBtn = $("yesBtn");
   
   let noClickCount = 0;
-  let yesScale = 1;
   
+  // Kita atur ukuran awal untuk tombol YES
+  let currentFontSize = 1; // dalam rem (standarnya 1rem)
+  let currentPadding = 0.8; // dalam rem (standarnya 0.8rem vertikal)
+
   // Daftar teks lucu
   const noTexts = [
     "Beneran nih?",
@@ -306,23 +309,29 @@ function initAnswers() {
       noBtn.textContent = noTexts[noClickCount];
       noClickCount++;
       
-      yesScale += 0.35;
-      yesBtn.style.transform = `scale(${yesScale})`;
-      yesBtn.style.transition = "transform 0.3s ease";
+      // Membesarkan tombol YES secara proporsional tanpa menimpa layout
+      currentFontSize += 0.2; // Tambah ukuran teks
+      currentPadding += 0.15; // Tambah jarak di dalam tombol
+      
+      yesBtn.style.fontSize = `${currentFontSize}rem`;
+      yesBtn.style.padding = `${currentPadding}rem ${currentPadding * 2}rem`;
+      yesBtn.style.transition = "all 0.3s ease";
+      
     } else {
+      // Hilangkan tombol NO di klik terakhir
       noBtn.style.display = "none";
     }
   });
 
-  // BAGIAN INI YANG PENTING UNTUK MEMICU HALAMAN PENUTUP
   yesBtn.addEventListener("click", () => {
-    // 1. Kembalikan ukuran tombol "Iya" seperti semula agar tidak menutupi layar saat transisi
-    yesBtn.style.transform = "scale(1)"; 
-    // 2. Panggil fungsi penutup
+    // Reset ukuran (opsional, agar saat transisi tidak aneh)
+    yesBtn.style.fontSize = "";
+    yesBtn.style.padding = "";
+    
     showClosing();
   });
 
-  // Tombol kembali/tutup bawaan
+  // Tombol kembali/tutup bawaan (biarkan saja)
   $("backBtn").addEventListener("click", () => {
     decline.hidden = true;
     $("capsule").scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
@@ -332,7 +341,6 @@ function initAnswers() {
     $("closeHint").hidden = false;
   });
 }
-
 // PASTIKAN FUNGSI INI TETAP ADA TEPAT DI BAWAH initAnswers()
 function showClosing() {
   const scene = $("scene");
