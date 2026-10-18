@@ -423,12 +423,11 @@ async function checkAuth() {
       $('memoryForm').reset();$('imagePreview').style.display = 'none';
       loadMemories(); // Refresh grid
 
-    } catch (err) {
-      console.error(err);
-      showToast('Gagal menyimpan kenangan.', 'error');
+   } catch (err) {
+      // Kita paksa error-nya muncul di layar sebagai pop-up!
+      alert("Tolong fotokan pesan ini ya: " + JSON.stringify(err));
+      showToast('Gagal: ' + (err.message || "Kesalahan sistem"), 'error');
     } finally {
-      btn.textContent = 'Simpan ke Database'; btn.disabled = false;
-    }
   });
 
 
