@@ -190,6 +190,59 @@ if (authForm) {
     }
   });
 }
+  /* ===== CEK SESSION SUPABASE ===== */
+async function checkAuth() {
+  try {
+    const {
+      data: { session },
+      error
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Gagal mengecek session:", error);
+      return;
+    }
+
+    if (session) {
+      STATE.user = session.user;
+      STATE.isCurator = true;
+
+      const curatorBadge = $("curatorBadge");
+      const titipBtn = $("titipBtn");
+      const addReasonContainer = $("addReasonContainer");
+      const loginBtn = $("loginBtn");
+
+      if (curatorBadge) {
+        curatorBadge.classList.remove("hidden");
+      }
+
+      if (titipBtn) {
+        titipBtn.classList.remove("hidden");
+      }
+
+      if (addReasonContainer) {
+        addReasonContainer.classList.remove("hidden");
+      }
+
+      if (loginBtn) {
+        loginBtn.hidden = true;
+      }
+
+      console.log(
+        "Session kurator ditemukan:",
+        session.user.email
+      );
+    } else {
+      STATE.user = null;
+      STATE.isCurator = false;
+
+      console.log("Tidak ada session aktif.");
+    }
+
+  } catch (err) {
+    console.error("checkAuth error:", err);
+  }
+}
   /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
     const btn = $("openBtn");
