@@ -31,10 +31,18 @@
   <main id="main" hidden>
     <button id="musicBtn" class="music" type="button" aria-label="Jeda musik" aria-pressed="false" hidden>♪</button>
     
-    <nav class="museum-nav">
-      <span class="nav-brand">Letteracha</span>
-      <span id="curatorBadge" class="badge hidden">Mode Kurator</span>
-    </nav>
+  <nav class="museum-nav">
+  <span class="nav-brand">Letteracha</span>
+
+  <div class="museum-nav-center" id="museumNav">
+    <button type="button" data-target="letter">Pengantar</button>
+    <button type="button" data-target="capsule">Pameran</button>
+    <button type="button" data-target="little">Arsip</button>
+    <button type="button" data-target="final">Penutup</button>
+  </div>
+
+  <span id="curatorBadge" class="badge hidden">Mode Kurator</span>
+</nav>
 
     <!-- Kata Pengantar -->
     <section class="sec letter-sec fade-in-section" id="letter">
