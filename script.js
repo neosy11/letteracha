@@ -243,6 +243,61 @@ async function checkAuth() {
     console.error("checkAuth error:", err);
   }
 }
+/* ===== MUSEUM SECTION NAVIGATION ===== */
+
+function initMuseumNavigation() {
+  const nav = $("museumNav");
+
+  if (!nav) return;
+
+  const buttons = nav.querySelectorAll("[data-target]");
+  const sections = Array.from(
+    document.querySelectorAll(".fade-in-section")
+  );
+
+  // Klik navigasi
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.target;
+      const target = $(targetId);
+
+      if (!target) return;
+
+      target.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+  });
+
+  // Menentukan menu aktif berdasarkan posisi section
+  if (!("IntersectionObserver" in window)) return;
+
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const id = entry.target.id;
+
+        buttons.forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.dataset.target === id
+          );
+        });
+      });
+    },
+    {
+      root: null,
+      threshold: 0.45
+    }
+  );
+
+  sections.forEach((section) => {
+    navObserver.observe(section);
+  });
+}
   /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
     const btn = $("openBtn");
@@ -593,7 +648,8 @@ checkAuth()
 
     initGate();
     initFuture();
+    initMuseumNavigation();
 
-  });
+});
 
 });
