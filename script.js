@@ -269,6 +269,23 @@ function initModal() {
   closeBtn.addEventListener("click", close);
   modal.addEventListener("click", e => { if (e.target === modal) close(); });
 }
+  /* ===== Titip Kenangan via WhatsApp ===== */
+function initTitip() {
+  const titipBtn = $("titipBtn");
+  if (!titipBtn) return;
+  
+  titipBtn.addEventListener("click", () => {
+    // GANTI NOMOR DI BAWAH DENGAN NOMORMU (Gunakan awalan 62 tanpa + atau 0)
+    // Contoh: "6281234567890"
+    const noWhatsApp = "628xxxxxxxxxx"; 
+    
+    // Pesan yang akan otomatis terketik di HP dia
+    const pesan = "Halo Pak Kurator! 🤍 Aku mau menambahkan koleksi baru nih di Museum Kita. Ini fotonya, tolong dipajang yaa...";
+    
+    // Membuka tab WhatsApp baru
+    window.open(`https://wa.me/${noWhatsApp}?text=${encodeURIComponent(pesan)}`, "_blank");
+  });
+}
 
 /* ===== 05 Penutup (Efek Debu Cahaya) ===== */
 function initFuture() {
