@@ -3,67 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Museum Kenangan Kita</title>
+<title>The Museum of Us</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Lora:ital@0;1&family=Playfair+Display:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="locked">
 
 <section id="gate" class="gate">
   <span class="glow" aria-hidden="true"></span>
-  <p class="gate-note">Selamat datang di Museum Kenangan Kita</p>
+  <p class="gate-note">The Museum of Us</p>
   <button id="openBtn" class="btn btn-primary" type="button"></button>
 </section>
 
 <main id="main" hidden>
   <button id="musicBtn" class="music" type="button" aria-label="Jeda musik" aria-pressed="false" hidden>♪</button>
 
-  <!-- Bagian Surat Masa Depan -->
   <section class="sec letter-sec fade-in-section" id="letter">
-    <h2 class="display">Lembaran Baru Kita...</h2>
+    <h2 class="display">Kata Pengantar</h2>
     <article class="paper" aria-live="off">
       <p id="letterText" class="letter-text"></p><span id="cursor" class="cursor" aria-hidden="true"></span>
       <p id="signature" class="signature"></p>
     </article>
-    <button id="skipBtn" class="btn btn-ghost" type="button">Lewati animasi</button>
   </section>
 
-  <!-- Bagian Kapsul Waktu / Galeri -->
   <section class="sec capsule-sec fade-in-section" id="capsule">
-    <h2 class="display">Kapsul Waktu Perjalanan Kita</h2>
-    <p class="hint">Sentuh kartu untuk membuka kenangannya.</p>
+    <h2 class="display">Ruang Pameran Utama</h2>
+    <p class="hint">Sentuh bingkai untuk membaca kisah di baliknya.</p>
     <div id="gallery" class="gallery"></div>
   </section>
 
-  <!-- Bagian 100 Hal -->
   <section class="sec little-sec fade-in-section" id="little">
-    <h2 class="display">Hal-hal yang membuatku jatuh cinta berkali-kali</h2>
-    <button id="reasonsBtn" class="btn btn-primary" type="button" aria-haspopup="dialog">100 hal yang aku cintai darimu</button>
+    <h2 class="display">Arsip Perasaan</h2>
+    <button id="reasonsBtn" class="btn btn-primary" type="button" aria-haspopup="dialog">100 Hal Tentang Kita</button>
   </section>
 
-  <!-- Bagian Penutup Baru (Tanpa Penolakan) -->
   <section class="sec final-sec fade-in-section" id="final">
-    <p class="final-text">Terima kasih sudah memberiku kesempatan untuk terus mengukir cerita bersamamu.</p>
-    <p class="final-q">Mari melangkah ke depan, bersama-sama.</p>
+    <p class="final-text">Sebuah museum tidak pernah benar-benar selesai. Ia akan terus bertambah seiring berjalannya waktu dan cerita yang baru.</p>
+    <p class="final-q">Mari penuhi ruangan ini dengan lebih banyak kenangan.</p>
     <div class="answers">
-      <button id="futureBtn" class="btn btn-primary" type="button">Untuk Masa Depan Kita 🤍</button>
+      <button id="futureBtn" class="btn btn-primary" type="button">Tutup Kunjungan Hari Ini</button>
     </div>
   </section>
 </main>
 
-<!-- Modal 100 Alasan -->
 <div id="modal" class="modal" hidden>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
-      <h3 id="modalTitle">100 Hal Tentangmu</h3>
+      <h3 id="modalTitle">Koleksi: 100 Hal Tentangmu</h3>
       <button id="modalClose" class="close" type="button" aria-label="Tutup daftar alasan">×</button>
     </div>
     <ol id="reasonList" class="reasons"></ol>
   </div>
 </div>
 
-<!-- Animasi Penutup Kelopak Bunga -->
 <div id="scene" class="scene" hidden aria-live="polite">
   <div id="petals" aria-hidden="true"></div>
   <div class="scene-msg" id="sceneMsg"></div>
