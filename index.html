@@ -1,175 +1,639 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Museum of Us</title>
-  <meta property="og:title" content="The Museum of Us">
-  <meta property="og:description" content="Sebuah ruang pameran khusus untuk kenangan kita. Buka pintunya, ya 🤍">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>">
+document.addEventListener("DOMContentLoaded", function () {
+  /* ===== KONFIGURASI SUPABASE ===== */
+  // MASUKKAN KREDENSIAL SUPABASE ANDA DI SINI
+  const SUPABASE_URL = 'https://hggbpvgyvtoxlfsgglom.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZ2Jwdmd5dnRveGxmc2dnbG9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDAzMDAsImV4cCI6MjEwNzg3NjMwMH0.OqF6TqPvKLejLMYWBkwYhAif_SB4On9ID216YR6TC_Q';
   
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="locked">
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <!-- Toast Notification System -->
-  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+  /* ===== STATE MANAGEMENT ===== */
+  const STATE = {
+    user: null,
+    memories: [],
+    things: [],
+    isCurator: false
+  };
 
-  <!-- Gate (Pintu Masuk) -->
-  <section id="gate" class="gate">
-    <span class="glow" aria-hidden="true"></span>
-    <h1 class="gate-title">The Museum of Us</h1>
-    <p class="gate-note">Every memory deserves a place.</p>
-    <button id="openBtn" class="btn btn-primary" type="button">Memasuki Museum</button>
-    <button id="loginBtn" class="btn btn-ghost btn-sm mt-4" type="button">Akses Kurator</button>
-  </section>
+  const CONFIG = {
+    senderName: "Ahmad Syauqi",
+    typeSpeedMs: 40,
+    apologyLetter: `Selamat datang di tempat di mana waktu berhenti sejenak.\n\nTempat ini dibangun bukan untuk mengingat satu hari tertentu, melainkan untuk menyimpan jejak dari setiap langkah yang kita ambil bersama. Dari tawa yang tak sengaja terekam, hingga keheningan yang nyaman saat kita berdua.\n\nMungkin akan ada masa di mana kita lupa, lelah, atau tersesat dalam rutinitas. Saat hari itu tiba, aku harap museum ini bisa menjadi tempat kita pulang—untuk mengingatkan kembali bagaimana semua ini dimulai, dan mengapa kita memilih untuk terus bertahan.\n\nSilakan berkeliling. Ruangan ini adalah milikmu, sama seperti hatiku.`,
+    closing: `Terima kasih atas kunjungannya.\nMuseum ini akan selalu terbuka untukmu.\n\nI love you.`
+  };
 
-  <main id="main" hidden>
-    <button id="musicBtn" class="music" type="button" aria-label="Jeda musik" aria-pressed="false" hidden>♪</button>
+  /* ===== HELPER FUNCTIONS ===== */
+  const $ = id => document.getElementById(id);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function showToast(message, type = 'success') {
+    const container = $('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
     
-  <nav class="museum-nav">
-  <span class="nav-brand">Letteracha</span>
+    // Trigger reflow
+    void toast.offsetWidth;
+    toast.classList.add('show');
 
-  <div class="museum-nav-center" id="museumNav">
-    <button type="button" data-target="letter">Pengantar</button>
-    <button type="button" data-target="capsule">Pameran</button>
-    <button type="button" data-target="little">Arsip</button>
-    <button type="button" data-target="final">Penutup</button>
-  </div>
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 4000);
+  }
 
-  <span id="curatorBadge" class="badge hidden">Mode Kurator</span>
-</nav>
+  function formatDate(dateString) {
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+  }
 
-    <!-- Kata Pengantar -->
-    <section class="sec letter-sec fade-in-section" id="letter">
-      <h2 class="display">Kata Pengantar</h2>
-      <article class="paper" aria-live="off">
-        <p id="letterText" class="letter-text"></p><span id="cursor" class="cursor" aria-hidden="true"></span>
-        <p id="signature" class="signature"></p>
-      </article>
-    </section>
+/* ===== AUTHENTICATION ===== */
 
-    <!-- Ruang Pameran Utama -->
-    <section class="sec capsule-sec fade-in-section" id="capsule">
-      <h2 class="display">Ruang Pameran Utama</h2>
-      <p class="hint">Sentuh bingkai untuk membuka kenangan.</p>
+async function checkAuth() {
+  try {
+    const {
+      data: { session },
+      error
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("Gagal mengecek session:", error);
+      return;
+    }
+
+    const curatorBadge = $("curatorBadge");
+    const titipBtn = $("titipBtn");
+    const addReasonContainer = $("addReasonContainer");
+    const loginBtn = $("loginBtn");
+
+    if (session?.user) {
+      STATE.user = session.user;
+
+      const email = (session.user.email || "").trim().toLowerCase();
+
+      STATE.isCurator = CURATOR_EMAILS.includes(email);
+
+      console.log(
+        STATE.isCurator
+          ? `Session curator ditemukan: ${email}`
+          : `User biasa ditemukan: ${email}`
+      );
+
+      // Badge curator
+      if (curatorBadge) {
+        curatorBadge.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
+      }
+
+      // Tombol tambah kenangan
+      if (titipBtn) {
+        titipBtn.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
+      }
+
+      // Tombol tambah "100 Hal"
+      if (addReasonContainer) {
+        addReasonContainer.classList.toggle(
+          "hidden",
+          !STATE.isCurator
+        );
+      }
+
+      // Tombol login
+      if (loginBtn) {
+        loginBtn.hidden = true;
+      }
+
+    } else {
+      STATE.user = null;
+      STATE.isCurator = false;
+
+      if (curatorBadge) {
+        curatorBadge.classList.add("hidden");
+      }
+
+      if (titipBtn) {
+        titipBtn.classList.add("hidden");
+      }
+
+      if (addReasonContainer) {
+        addReasonContainer.classList.add("hidden");
+      }
+
+      if (loginBtn) {
+        loginBtn.hidden = false;
+      }
+
+      console.log("Tidak ada session aktif.");
+    }
+
+  } catch (err) {
+    console.error("checkAuth error:", err);
+  }
+}
+
+/* ===== BUKA MODAL LOGIN ===== */
+
+const loginButton = $("loginBtn");
+const authModal = $("authModal");
+
+if (loginButton && authModal) {
+  loginButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    authModal.hidden = false;
+  });
+}
+
+
+/* ===== PROSES LOGIN ===== */
+
+const authForm = $("authForm");
+
+if (authForm) {
+  authForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+    const btn = e.currentTarget.querySelector("button");
+
+    btn.textContent = "Memverifikasi...";
+    btn.disabled = true;
+
+    try {
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+      if (error) {
+        console.error("Supabase Login Error:", error);
+
+        showToast(
+          `Login gagal: ${error.message}`,
+          "error"
+        );
+
+        return;
+      }
+
+      if (!data.session || !data.user) {
+        throw new Error("Session login tidak ditemukan.");
+      }
+
+      /* Simpan user */
+      STATE.user = data.user;
+      STATE.isCurator = true;
+
+      /* Aktifkan mode kurator */
+      $("curatorBadge")?.classList.remove("hidden");
+      $("titipBtn")?.classList.remove("hidden");
+      $("addReasonContainer")?.classList.remove("hidden");
+
+      /* Sembunyikan tombol login */
+      if ($("loginBtn")) {
+        $("loginBtn").hidden = true;
+      }
+
+      /* Tutup modal */
+      $("authModal").hidden = true;
+
+      showToast("Selamat datang kembali, Kurator!");
+
+      /* Refresh data */
+      await loadMemories();
+      await loadThings();
+
+    } catch (err) {
+
+      console.error("Login Exception:", err);
+
+      showToast(
+        `Terjadi kesalahan: ${err.message}`,
+        "error"
+      );
+
+    } finally {
+
+      btn.textContent = "Masuk";
+      btn.disabled = false;
+
+    }
+  });
+}
+
+/* ===== MUSEUM SECTION NAVIGATION ===== */
+
+function initMuseumNavigation() {
+  const nav = $("museumNav");
+
+  if (!nav) return;
+
+  const buttons = nav.querySelectorAll("[data-target]");
+  const sections = Array.from(
+    document.querySelectorAll(".fade-in-section")
+  );
+
+  // Klik navigasi
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.target;
+      const target = $(targetId);
+
+      if (!target) return;
+
+      target.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+  });
+
+  // Menentukan menu aktif berdasarkan posisi section
+  if (!("IntersectionObserver" in window)) return;
+
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const id = entry.target.id;
+
+        buttons.forEach((button) => {
+          button.classList.toggle(
+            "active",
+            button.dataset.target === id
+          );
+        });
+      });
+    },
+    {
+      root: null,
+      threshold: 0.45
+    }
+  );
+
+  sections.forEach((section) => {
+    navObserver.observe(section);
+  });
+}
+  /* ===== 01 GATE & NAVIGATION ===== */
+  function initGate() {
+    const btn = $("openBtn");
+    let busy = false;
+    btn.addEventListener("click", () => {
+      if (busy) return;
+      busy = true; btn.disabled = true;
+      $("main").hidden = false;
+      $("gate").classList.add("out");
+      setTimeout(() => {
+        $("gate").hidden = true;
+        document.body.classList.remove("locked");
+        initLetterObserver();
+        loadMemories();
+        loadThings();
+      }, reduced ? 50 : 1500);
+    });
+  }
+
+  /* ===== 02 KATA PENGANTAR ===== */
+  let typeTimer = null, typed = false;
+  function finishLetter() {
+    clearTimeout(typeTimer);
+    $("letterText").textContent = CONFIG.apologyLetter;
+    $("cursor").classList.add("done");
+    $("signature").textContent = CONFIG.senderName;
+    $("signature").classList.add("show");
+  }
+
+  function startTypewriter() {
+    if (typed) return; typed = true;
+    if (reduced) return finishLetter();
+    const text = CONFIG.apologyLetter, out = $("letterText");
+    let i = 0;
+    (function tick() {
+      if (i >= text.length) return finishLetter();
+      out.textContent = text.slice(0, ++i);
+      const ch = text[i - 1];
+      typeTimer = setTimeout(tick, CONFIG.typeSpeedMs + (/[.,\n]/.test(ch) ? 200 : 0));
+    })();
+  }
+
+  function initLetterObserver() {
+    if (!("IntersectionObserver" in window)) return startTypewriter();
+    const io = new IntersectionObserver(es => {
+      if (es[0].isIntersecting) { io.disconnect(); startTypewriter(); }
+    }, { threshold: 0.35 });
+    io.observe($("letter"));
+  }
+
+  /* ===== 03 CRUD KENANGAN (DATABASE) ===== */
+  async function loadMemories() {
+    const gallery = $("gallery");
+    const { data, error } = await supabase
+      .from('memories')
+      .select('*')
+      .order('date', { ascending: true });
+
+    if (error) {
+      showToast('Gagal memuat arsip museum.', 'error');
+      gallery.innerHTML = '<p class="hint">Gagal terhubung ke arsip.</p>';
+      return;
+    }
+
+    STATE.memories = data;
+    renderGallery(data);
+  }
+
+  function renderGallery(memories) {
+    const g = $("gallery");
+    g.innerHTML = '';
+    
+    if (memories.length === 0) {
+      g.innerHTML = '<p class="hint" style="grid-column: 1/-1; text-align: center;">Belum ada kenangan yang dipajang di ruang ini.</p>';
+      return;
+    }
+
+    memories.forEach(m => {
+      const card = document.createElement("button");
+      card.type = "button"; card.className = "card";
+      card.setAttribute("aria-expanded", "false");
+
+      const photo = document.createElement("div"); photo.className = "photo";
+      const img = document.createElement("img");
       
-      <div class="filter-bar">
-        <input type="text" id="searchInput" placeholder="Cari kenangan..." class="input-field" />
-      </div>
+      // Handle Image Fetching from Supabase Storage
+      const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(m.image_url);
+      img.src = m.image_url ? publicUrlData.publicUrl : ''; 
+      img.alt = `Arsip: ${m.title}`; img.loading = "lazy";
+      img.addEventListener("error", () => { img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23EAE0CF"/></svg>'; });
+      photo.appendChild(img);
 
-      <div id="gallery" class="gallery">
-        <!-- Skeleton Loader saat fetching DB -->
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
+      const label = document.createElement("div"); label.className = "label"; label.textContent = m.title;
+      const meta = document.createElement("div"); meta.className = "meta";
+      const time = document.createElement("time"); time.textContent = formatDate(m.date);
       
-      <!-- Tombol Titip Kenangan (Hanya terlihat oleh Kurator) -->
-      <button id="titipBtn" class="btn btn-ghost hidden mt-4" type="button" aria-haspopup="dialog">
-        + Tambah Koleksi Baru
-      </button>
-    </section>
+      const cat = document.createElement("span"); 
+      cat.style.display = "block"; cat.style.fontSize = "0.8rem"; cat.style.marginBottom = "0.5rem"; cat.style.color = "var(--text-main)"; cat.textContent = m.category;
 
-    <!-- Arsip Perasaan / 100 Hal -->
-    <section class="sec little-sec fade-in-section" id="little">
-      <h2 class="display">Arsip Perasaan</h2>
-      <p class="hint">Koleksi 100 Hal Tentang Kita</p>
-      <div class="progress-container">
-        <div class="progress-bar" id="reasonsProgress"></div>
-      </div>
-      <p id="progressText" class="hint-small">0 dari 100 terkumpul</p>
-      <button id="reasonsBtn" class="btn btn-primary mt-2" type="button" aria-haspopup="dialog">Buka Arsip</button>
-    </section>
+      const desc = document.createElement("span"); desc.textContent = m.description;
+      meta.append(time, cat, desc);
 
-    <!-- Penutup -->
-    <section class="sec final-sec fade-in-section" id="final">
-      <p class="final-text">Sebuah museum tidak pernah benar-benar selesai. Ia akan terus bertambah seiring berjalannya waktu dan cerita yang baru.</p>
-      <div class="answers">
-        <button id="futureBtn" class="btn btn-primary" type="button">Tutup Kunjungan Hari Ini</button>
-      </div>
-    </section>
-  </main>
+      card.append(photo, label, meta);
+      card.addEventListener("click", () => {
+        const open = card.classList.toggle("open");
+        card.setAttribute("aria-expanded", String(open));
+      });
+      g.appendChild(card);
+    });
+  }
 
-  <!-- Modal 100 Hal -->
-  <div id="modal" class="modal" hidden>
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head">
-        <h3 id="modalTitle">100 Hal Tentang Kita</h3>
-        <button class="close close-modal" type="button" aria-label="Tutup">×</button>
-      </div>
-      <div class="modal-body">
-        <ol id="reasonList" class="reasons"></ol>
-        <div id="addReasonContainer" class="hidden mt-4 add-form-group">
-          <input type="text" id="newReasonInput" class="input-field" placeholder="Tambahkan hal baru...">
-          <button id="saveReasonBtn" class="btn btn-primary btn-sm">Simpan</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  // Pencarian (Search)
+  $('searchInput').addEventListener('input', (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const filtered = STATE.memories.filter(m => 
+      m.title.toLowerCase().includes(keyword) || 
+      m.description.toLowerCase().includes(keyword) ||
+      m.category.toLowerCase().includes(keyword)
+    );
+    renderGallery(filtered);
+  });
 
-  <!-- Modal Form Kenangan Baru -->
-  <div id="memoryModal" class="modal" hidden>
-    <div class="modal-box" role="dialog" aria-modal="true">
-      <div class="modal-head">
-        <h3>Arsip Kenangan Baru</h3>
-        <button class="close close-memory-modal" type="button">×</button>
-      </div>
-      <form id="memoryForm" class="modal-body form-layout">
-        <div class="form-group">
-          <label>Judul Kenangan</label>
-          <input type="text" id="memTitle" class="input-field" required>
-        </div>
-        <div class="form-group">
-          <label>Tanggal Kejadian</label>
-          <input type="date" id="memDate" class="input-field" required>
-        </div>
-        <div class="form-group">
-          <label>Cerita Singkat</label>
-          <textarea id="memDesc" class="input-field" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-          <label>Kategori</label>
-          <select id="memCat" class="input-field">
-            <option value="Hari-Hari Sederhana">Hari-Hari Sederhana</option>
-            <option value="Perjalanan">Perjalanan</option>
-            <option value="Momen Lucu">Momen Lucu</option>
-            <option value="Hari Spesial">Hari Spesial</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Foto Pendukung</label>
-          <input type="file" id="memImage" accept="image/*" class="input-field file-input" required>
-          <div id="imagePreview" class="image-preview"></div>
-        </div>
-        <button type="submit" id="saveMemoryBtn" class="btn btn-primary w-100">Simpan ke Database</button>
-      </form>
-    </div>
-  </div>
+  // Modal Penambahan Kenangan
+  $('titipBtn').addEventListener('click', () => {
+    if (!STATE.isCurator) return showToast('Hanya Kurator yang dapat menambah koleksi.', 'error');
+    $('memoryModal').hidden = false;
+  });
 
-  <!-- Modal Auth -->
-  <div id="authModal" class="modal" hidden>
-    <div class="modal-box auth-box" role="dialog" aria-modal="true">
-      <div class="modal-head">
-        <h3>Akses Kurator</h3>
-        <button class="close close-auth-modal" type="button">×</button>
-      </div>
-      <form id="authForm" class="modal-body form-layout">
-        <input type="email" id="authEmail" class="input-field" placeholder="Email" required>
-        <input type="password" id="authPassword" class="input-field" placeholder="Password" required>
-        <button type="submit" class="btn btn-primary w-100">Masuk</button>
-      </form>
-    </div>
-  </div>
+  document.querySelectorAll('.close-memory-modal').forEach(btn => {
+    btn.addEventListener('click', () => { $('memoryModal').hidden = true; $('memoryForm').reset();$('imagePreview').style.display = 'none'; });
+  });
 
-  <div id="scene" class="scene" hidden aria-live="polite">
-    <div id="petals" aria-hidden="true"></div>
-    <div class="scene-msg" id="sceneMsg"></div>
-  </div>
+  // Image Preview
+  $('memImage').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        $('imagePreview').style.display = 'block';$('imagePreview').style.backgroundImage = `url(${e.target.result})`;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
 
-  <script src="script.js"></script>
-</body>
-</html>
+  // Submit Kenangan Baru
+  $('memoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('saveMemoryBtn');
+    btn.textContent = 'Menyimpan ke Arsip...'; btn.disabled = true;
+
+    try {
+      const title = $('memTitle').value;
+      const date = $('memDate').value;
+      const desc = $('memDesc').value;
+      const category = $('memCat').value;
+      const file = $('memImage').files[0];
+      
+      let imageUrl = '';
+
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `memories/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage.from('museum_media').upload(filePath, file);
+        if (uploadError) throw uploadError;
+        imageUrl = filePath;
+      }
+
+      const { error: insertError } = await supabase.from('memories').insert([
+        {
+        title,
+        date,
+        description: desc,
+        category,
+        image_url: imageUrl,
+        user_id: STATE.user.id
+        }
+      ]);
+
+      if (insertError) throw insertError;
+
+      showToast('Kenangan berhasil diabadikan.');
+      $('memoryModal').hidden = true;
+      $('memoryForm').reset();$('imagePreview').style.display = 'none';
+      loadMemories(); // Refresh grid
+
+   
+    } catch (err) {
+      console.error("Gagal menyimpan kenangan:", err);
+
+      showToast(
+        'Gagal: ' + (err?.message || "Kesalahan sistem"),
+        'error'
+      );
+    } finally {
+      btn.textContent = 'Simpan ke Database';
+      btn.disabled = false;
+    }
+  });
+
+  /* ===== 04 KOLEKSI 100 HAL (THINGS ABOUT US) ===== */
+  async function loadThings() {
+    const { data, error } = await supabase
+      .from('things_about_us')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      STATE.things = data;
+      renderThings();
+    }
+  }
+
+  function renderThings() {
+    const list = $("reasonList");
+    list.innerHTML = '';
+    let completedCount = 0;
+
+    STATE.things.forEach(thing => {
+      if (thing.is_completed) completedCount++;
+      const li = document.createElement("li");
+      if (thing.is_completed) li.className = "completed";
+      
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.className = "reason-check";
+      check.checked = thing.is_completed;
+      check.disabled = !STATE.isCurator; // Only curator can check off items
+      
+      check.addEventListener('change', async (e) => {
+        if (!STATE.isCurator) return;
+        const isChecked = e.target.checked;
+        li.classList.toggle("completed", isChecked);
+        await supabase.from('things_about_us').update({ is_completed: isChecked }).eq('id', thing.id);
+        updateProgress();
+      });
+
+      const text = document.createElement("span");
+      text.className = "reason-text";
+      text.textContent = thing.content;
+
+      li.append(check, text);
+      list.appendChild(li);
+    });
+
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = Math.max(STATE.things.length, 100); // Base target is 100
+    const completed = STATE.things.filter(t => t.is_completed).length;
+    const percentage = Math.min((completed / total) * 100, 100);
+    
+    $('reasonsProgress').style.width = `${percentage}%`;
+    $('progressText').textContent = `${completed} dari 100 momen telah terkumpul`;
+  }
+
+  // Tambah Hal Baru
+  $('saveReasonBtn').addEventListener('click', async () => {
+    const input = $('newReasonInput');
+    const content = input.value.trim();
+    if (!content) return;
+    
+    const btn = $('saveReasonBtn');
+    btn.disabled = true;
+
+    const { error } = await supabase.from('things_about_us').insert([{ content }]);
+    if (!error) {
+      input.value = '';
+      await loadThings();
+    } else {
+      showToast('Gagal menambah hal baru.', 'error');
+    }
+    btn.disabled = false;
+  });
+
+  // Modal 100 Hal Setup
+  const modal = $("modal"), openBtn = $("reasonsBtn");
+  document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.addEventListener('click', () => modal.hidden = true);
+  });
+  openBtn.addEventListener("click", () => { modal.hidden = false; });
+
+
+  /* ===== 05 FINAL SCENE (DEBU CAHAYA) ===== */
+  function initFuture() {
+    $("futureBtn").addEventListener("click", showClosing);
+  }
+
+  function showClosing() {
+    const scene = $("scene");
+    $("sceneMsg").textContent = CONFIG.closing; 
+    scene.hidden = false; 
+    document.body.classList.add("locked");
+
+    if (reduced) return;
+    const box = $("petals");
+    box.innerHTML = ''; 
+
+    for (let i = 0; i < 40; i++) {                 
+      const p = document.createElement("span");
+      p.className = "dust";
+      const size = Math.random() * 4 + 2;
+      p.style.cssText = `
+        left:${Math.random() * 100}%;
+        width: ${size}px; height: ${size}px;
+        animation-duration:${8 + Math.random() * 10}s;
+        animation-delay:${-Math.random() * 5}s
+      `;
+      box.appendChild(p);
+    }
+  }
+
+ /* ===== OBSERVER & INIT ===== */
+
+const observer = new IntersectionObserver((entries) => {
+
+  entries.forEach((entry) => {
+
+    if (entry.isIntersecting) {
+
+      entry.target.classList.add("is-visible");
+
+      observer.unobserve(entry.target);
+
+    }
+
+  });
+
+}, {
+  threshold: 0.15
+});
+
+
+document
+  .querySelectorAll(".fade-in-section")
+  .forEach((el) => observer.observe(el));
+
+
+/* ===== START WEBSITE ===== */
+
+checkAuth()
+  .catch((err) => {
+    console.error("Auth initialization error:", err);
+  })
+  .finally(() => {
+
+    initGate();
+    initFuture();
+    initMuseumNavigation();
+
+});
+
+});
