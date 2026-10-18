@@ -277,10 +277,10 @@ function initTitip() {
   titipBtn.addEventListener("click", () => {
     // GANTI NOMOR DI BAWAH DENGAN NOMORMU (Gunakan awalan 62 tanpa + atau 0)
     // Contoh: "6281234567890"
-    const noWhatsApp = "628xxxxxxxxxx"; 
+    const noWhatsApp = "6283159656217"; 
     
     // Pesan yang akan otomatis terketik di HP dia
-    const pesan = "Halo Pak Kurator! 🤍 Aku mau menambahkan koleksi baru nih di Museum Kita. Ini fotonya, tolong dipajang yaa...";
+    const pesan = "Halo Pak Penjaga Museum! 🤍 Aku mau menambahkan koleksi baru nih di Museum Kita. Ini fotonya, tolong dipajang yaa...";
     
     // Membuka tab WhatsApp baru
     window.open(`https://wa.me/${noWhatsApp}?text=${encodeURIComponent(pesan)}`, "_blank");
