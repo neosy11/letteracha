@@ -26,10 +26,10 @@ Maafkan aku, ya. Aku masih punya banyak hal yang ingin aku perbaiki, terutama da
   musicEnabled: true,
   musicPath: "assets/audio/lagu-kita.mp3",
   memories: [
-    { title: "The First Memory", image: "assets/images/memory-1.JPEG", date: "18 Agustus 2026", caption: "Ini pas pertama kali kita foto sayangggg.. ingatt kann??" },
-    { title: "That Random Day", image: "assets/images/memory-2.JPEG", date: "21 Agustus 2026", caption: "Foto ini pas magrib magrib banget.. dua duanya cape HAHHA" },
-    { title: "The Love", image: "assets/images/memory-3.JPEG", date: "2 Oktober 2026", caption: "HAHHA ingett bangett ini pas kita awal awal go public" },
-    { title: "My Favorite Photo", image: "assets/images/memory-4.JPEG", date: "16 Oktober 2026", caption: "SUMPAH AKU GA BOSEN LIATIN FOTO INI SAYANGG" }
+    { title: "The First Memory", image: "assets/images/memory-1.jpeg", date: "18 Agustus 2026", caption: "Ini pas pertama kali kita foto sayangggg.. ingatt kann??" },
+    { title: "That Random Day", image: "assets/images/memory-2.jpeg", date: "21 Agustus 2026", caption: "Foto ini pas magrib magrib banget.. dua duanya cape HAHHA" },
+    { title: "The Love", image: "assets/images/memory-3.jpeg", date: "2 Oktober 2026", caption: "HAHHA ingett bangett ini pas kita awal awal go public" },
+    { title: "My Favorite Photo", image: "assets/images/memory-4.jpeg", date: "16 Oktober 2026", caption: "SUMPAH AKU GA BOSEN LIATIN FOTO INI SAYANGG" }
   ],
   reasonPrefix: "Karena ",
   reasons: [
