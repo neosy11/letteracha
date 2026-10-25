@@ -103,9 +103,19 @@
         <!-- Item Scrapbook di-render oleh JS -->
       </div>
       
-      <div id="scrapbookControls" class="hidden mt-4">
-        <input type="text" id="scrapNoteInput" class="input-field" placeholder="Tulis catatan polaroid..." style="width: 250px; display: inline-block;">
-        <button id="addScrapNoteBtn" class="btn btn-primary btn-sm">Tempel Catatan</button>
+     <div id="scrapbookControls" class="hidden mt-4" style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+        <!-- Tambah Catatan -->
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="scrapNoteInput" class="input-field" placeholder="Tulis catatan polaroid..." style="width: 220px;">
+          <button id="addScrapNoteBtn" class="btn btn-primary btn-sm">Tempel Teks</button>
+        </div>
+        
+        <!-- Tambah Foto Polaroid -->
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <label for="scrapImageInput" class="btn btn-ghost btn-sm" style="cursor: pointer; margin: 0;">Pilih Foto</label>
+          <input type="file" id="scrapImageInput" accept="image/*" style="display: none;">
+          <button id="addScrapPhotoBtn" class="btn btn-primary btn-sm">Tempel Foto</button>
+        </div>
       </div>
     </section>
     
