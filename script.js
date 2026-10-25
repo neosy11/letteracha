@@ -372,7 +372,7 @@ function initMuseumNavigation() {
       let contentHTML = '';
       if (item.type === 'photo') {
         const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(item.content);
-        contentHTML = `<img src="${publicUrlData.publicUrl}" alt="Polaroid">`;
+        contentHTML = `<img src="${publicUrlData.publicUrl}" alt="Polaroid" loading="lazy" decoding="async">`;
       } else {
         contentHTML = item.content;
       }
@@ -388,9 +388,10 @@ function initMuseumNavigation() {
     });
   }
 
-  function makeDraggable(el, id, initialX, initialY) {
+ function makeDraggable(el, id, initialX, initialY) {
     let isDragging = false;
     let startX, startY, currentX = initialX, currentY = initialY;
+    let ticking = false; // <-- Variabel baru untuk mengontrol frame rate agar tidak lag
 
     el.addEventListener('pointerdown', (e) => {
       if (!STATE.isCurator || e.target.classList.contains('scrap-delete-btn')) return; 
@@ -405,7 +406,15 @@ function initMuseumNavigation() {
       if (!isDragging) return;
       currentX = e.clientX - startX;
       currentY = e.clientY - startY;
-      el.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${el.dataset.rotation}deg)`;
+      
+      // Menggunakan requestAnimationFrame agar pergeseran foto di HP sangat mulus
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          el.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${el.dataset.rotation}deg)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
 
     el.addEventListener('pointerup', async (e) => {
@@ -414,6 +423,7 @@ function initMuseumNavigation() {
       el.style.zIndex = 1;
       el.releasePointerCapture(e.pointerId);
       
+      // Update posisi baru ke Supabase di latar belakang
       await supabase.from('scrapbook').update({ pos_x: currentX, pos_y: currentY }).eq('id', id);
     });
   }
@@ -600,7 +610,9 @@ function initMuseumNavigation() {
       // Handle Image Fetching from Supabase Storage
       const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(m.image_url);
       img.src = m.image_url ? publicUrlData.publicUrl : ''; 
-      img.alt = `Arsip: ${m.title}`; img.loading = "lazy";
+      img.alt = `Arsip: ${m.title}`; 
+      img.loading = "lazy";
+      img.decoding = "async"; // <-- Perintah tambahan untuk HP
       img.addEventListener("error", () => { img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23EAE0CF"/></svg>'; });
       photo.appendChild(img);
 
@@ -857,7 +869,7 @@ function initMuseumNavigation() {
   function initFuture() {
     $("futureBtn").addEventListener("click", showClosing);
   }
-
+  
   function showClosing() {
     const scene = $("scene");
     $("sceneMsg").textContent = CONFIG.closing; 
@@ -868,7 +880,10 @@ function initMuseumNavigation() {
     const box = $("petals");
     box.innerHTML = ''; 
 
-    for (let i = 0; i < 40; i++) {                 
+    // Kurangi jumlah debu jika layarnya sempit (HP)
+    const particleCount = window.innerWidth < 768 ? 15 : 40;
+
+    for (let i = 0; i < particleCount; i++) {                 
       const p = document.createElement("span");
       p.className = "dust";
       const size = Math.random() * 4 + 2;
@@ -876,7 +891,26 @@ function initMuseumNavigation() {
         left:${Math.random() * 100}%;
         width: ${size}px; height: ${size}px;
         animation-duration:${8 + Math.random() * 10}s;
-        animation-delay:${-Math.random() * 5}s
+        animation-delay:${-Math.random() * 5}s;
+        will-change: transform, opacity; /* Meringankan kerja GPU */
+      `;
+      box.appendChild(p);
+    }
+  }
+
+    // Jika layar HP (lebar di bawah 768px), partikel dikurangi jadi 15 saja
+    const particleCount = window.innerWidth < 768 ? 15 : 40;
+
+    for (let i = 0; i < particleCount; i++) {                 
+      const p = document.createElement("span");
+      p.className = "dust";
+      const size = Math.random() * 4 + 2;
+      p.style.cssText = `
+        left:${Math.random() * 100}%;
+        width: ${size}px; height: ${size}px;
+        animation-duration:${8 + Math.random() * 10}s;
+        animation-delay:${-Math.random() * 5}s;
+        will-change: transform, opacity; /* Bantuan Hardware Acceleration */
       `;
       box.appendChild(p);
     }
