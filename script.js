@@ -288,25 +288,37 @@ function initMuseumNavigation() {
     navObserver.observe(section);
   });
 }
-  /* ===== 01 GATE & NAVIGATION ===== */
+  
+/* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
     const btn = $("openBtn");
     let busy = false;
     btn.addEventListener("click", () => {
       if (busy) return;
-      busy = true; btn.disabled = true;
+      busy = true; 
+      btn.textContent = "Membuka Pintu...";
+      btn.disabled = true;
+      
       $("main").hidden = false;
       $("gate").classList.add("out");
-      setTimeout(() => {
+      
+      // Tambahkan kata "async" di dalam setTimeout
+      setTimeout(async () => {
         $("gate").hidden = true;
         document.body.classList.remove("locked");
         initLetterObserver();
-        loadMemories();
+        
+        // Tunggu database selesai mengambil data kenangan
+        await loadMemories();
         loadThings();
-      }, reduced ? 50 : 1500);
+        
+        // Panggil Mesin Waktu!
+        showMemoryOfTheDay();
+        
+      }, 1500);
     });
   }
-
+  
   /* ===== 02 KATA PENGANTAR ===== */
   let typeTimer = null, typed = false;
   function finishLetter() {
@@ -576,7 +588,58 @@ function initMuseumNavigation() {
     btn.addEventListener('click', () => modal.hidden = true);
   });
   openBtn.addEventListener("click", () => { modal.hidden = false; });
+  
+  /* ===== MESIN WAKTU HARIAN (ON THIS DAY) ===== */
+  function showMemoryOfTheDay() {
+    if (!STATE.memories || STATE.memories.length === 0) return;
 
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentDate = today.getDate();
+    const currentYear = today.getFullYear();
+
+    // 1. Filter kenangan di tanggal dan bulan yang sama dari tahun sebelumnya
+    const onThisDayMemories = STATE.memories.filter(m => {
+      const memDate = new Date(m.date);
+      return memDate.getMonth() === currentMonth && 
+             memDate.getDate() === currentDate && 
+             memDate.getFullYear() < currentYear;
+    });
+
+    let selectedMemory = null;
+    let isOnThisDay = false;
+
+    if (onThisDayMemories.length > 0) {
+      // Ambil secara acak jika ada lebih dari 1 kenangan di hari yang sama
+      selectedMemory = onThisDayMemories[Math.floor(Math.random() * onThisDayMemories.length)];
+      isOnThisDay = true;
+    } else {
+      // Jika tidak ada kejadian hari ini di tahun lalu, ambil 1 kenangan acak apa saja
+      selectedMemory = STATE.memories[Math.floor(Math.random() * STATE.memories.length)];
+      isOnThisDay = false;
+    }
+
+    // 2. Render data ke dalam Pop-up
+    $('motdTitleLabel').textContent = isOnThisDay ? "⏳ Hari Ini di Masa Lalu" : "✨ Kenangan Acak Hari Ini";
+    $('motdTitle').textContent = selectedMemory.title;
+    $('motdDate').textContent = formatDate(selectedMemory.date);
+    $('motdDesc').textContent = selectedMemory.description;
+
+    const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(selectedMemory.image_url);
+    $('motdImage').src = selectedMemory.image_url ? publicUrlData.publicUrl : '';
+
+    // 3. Tampilkan dengan sedikit jeda agar dramatis
+    setTimeout(() => {
+      $('motdModal').hidden = false;
+    }, 1200);
+  }
+
+  // Tombol untuk menutup pop-up mesin waktu
+  document.querySelectorAll('.close-motd').forEach(btn => {
+    btn.addEventListener('click', () => { 
+      $('motdModal').hidden = true; 
+    });
+  });
 
   /* ===== 05 FINAL SCENE (DEBU CAHAYA) ===== */
   function initFuture() {
