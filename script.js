@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const CONFIG = {
     senderName: "Ahmad Syauqi",
     typeSpeedMs: 30,
+    musicEnabled: true,
+    musicPath: "assets/audio/lagu-kita.mp3",
     apologyLetter: `Selamat datang di tempat di mana waktu berhenti sejenak.\n\nTempat ini dibangun bukan untuk mengingat satu hari tertentu, melainkan untuk menyimpan jejak dari setiap langkah yang kita ambil bersama. Dari tawa yang tak sengaja terekam, hingga keheningan yang nyaman saat kita berdua.\n\nMungkin akan ada masa di mana kita lupa, lelah, atau tersesat dalam rutinitas. Saat hari itu tiba, aku harap museum ini bisa menjadi tempat kita pulang—untuk mengingatkan kembali bagaimana semua ini dimulai, dan mengapa kita memilih untuk terus bertahan.\n\nSilakan berkeliling. Ruangan ini adalah milikmu, sama seperti hatiku.`,
     closing: `Terima kasih atas kunjungannya.\nMuseum ini akan selalu terbuka untukmu.\n\nI love you.`
   };
@@ -29,6 +31,30 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ===== HELPER FUNCTIONS ===== */
   const $ = id => document.getElementById(id);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let audio = null;
+
+  function startMusic() {
+    const mbtn = $("musicBtn");
+    if (!CONFIG.musicEnabled) return;
+    try {
+      audio = new Audio(CONFIG.musicPath);
+      audio.loop = true; 
+      audio.volume = 0.5; // Atur volume (0.0 sampai 1.0)
+      audio.addEventListener("error", () => { mbtn.hidden = true; });
+      const p = audio.play();
+      mbtn.hidden = false;
+      if (p && p.catch) p.catch(() => { mbtn.hidden = true; audio = null; });
+    } catch (e) { mbtn.hidden = true; }
+    
+    mbtn.addEventListener("click", () => {
+      if (!audio) return;
+      const paused = !audio.paused;
+      if (paused) audio.pause(); else audio.play().catch(() => {});
+      mbtn.classList.toggle("paused", paused);
+      mbtn.setAttribute("aria-pressed", String(paused));
+      mbtn.setAttribute("aria-label", paused ? "Putar musik" : "Jeda musik");
+    });
+  }
 
   function showToast(message, type = 'success') {
     const container = $('toastContainer');
@@ -482,6 +508,8 @@ function initMuseumNavigation() {
       busy = true; 
       btn.textContent = "Membuka Pintu...";
       btn.disabled = true;
+
+      startMusic();
       
       $("main").hidden = false;
       $("gate").classList.add("out");
