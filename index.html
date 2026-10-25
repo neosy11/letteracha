@@ -149,7 +149,26 @@
       </form>
     </div>
   </div>
-
+  
+<!-- Modal Mesin Waktu Harian (On This Day) -->
+  <div id="motdModal" class="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" style="text-align: center; padding: 0;">
+      <div class="modal-head" style="border-bottom: none; padding-bottom: 0;">
+        <h3 id="motdTitleLabel" style="font-style: italic; color: var(--text-muted); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px;">⏳ Hari Ini di Masa Lalu</h3>
+        <button class="close close-motd" type="button">×</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <div class="photo" style="width: 100%; max-height: 350px; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; background: var(--bg-alt);">
+          <img id="motdImage" src="" alt="Memory" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <h2 id="motdTitle" class="display" style="font-size: 2rem; margin-bottom: 0.5rem; line-height: 1.2;">Judul Kenangan</h2>
+        <time id="motdDate" style="color: var(--accent); font-weight: bold; font-family: var(--sans); font-size: 0.9rem; display: block; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Tanggal</time>
+        <p id="motdDesc" style="font-family: var(--lora); color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">Deskripsi singkat kenangan.</p>
+        <button class="btn btn-primary close-motd mt-4" style="width: 100%;">Lanjutkan Perjalanan Museum</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Modal Auth -->
   <div id="authModal" class="modal" hidden>
     <div class="modal-box auth-box" role="dialog" aria-modal="true">
