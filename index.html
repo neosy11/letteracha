@@ -85,6 +85,30 @@
       <button id="reasonsBtn" class="btn btn-primary mt-2" type="button" aria-haspopup="dialog">Buka Arsip</button>
     </section>
 
+    <!-- Museum Analytics -->
+    <section class="sec fade-in-section" id="analytics" style="background: var(--text-main); color: var(--bg-color);">
+      <h2 class="display" style="color: var(--bg-alt);">Jejak Langkah</h2>
+      <p class="hint" style="color: rgba(234, 224, 207, 0.7);">Statistik perjalanan yang terekam dalam museum ini.</p>
+      <div class="analytics-grid" id="analyticsGrid">
+        <!-- Kalkulasi di-render oleh JS -->
+      </div>
+    </section>
+
+    <!-- Interactive Scrapbook -->
+    <section class="sec fade-in-section" id="scrapbook" style="background: var(--bg-alt);">
+      <h2 class="display">Papan Memori</h2>
+      <p class="hint">Ruang bebas untuk menyusun pecahan memori.</p>
+      
+      <div id="scrapbookCanvas" class="scrapbook-canvas">
+        <!-- Item Scrapbook di-render oleh JS -->
+      </div>
+      
+      <div id="scrapbookControls" class="hidden mt-4">
+        <input type="text" id="scrapNoteInput" class="input-field" placeholder="Tulis catatan polaroid..." style="width: 250px; display: inline-block;">
+        <button id="addScrapNoteBtn" class="btn btn-primary btn-sm">Tempel Catatan</button>
+      </div>
+    </section>
+    
     <!-- Penutup -->
     <section class="sec final-sec fade-in-section" id="final">
       <p class="final-text">Sebuah museum tidak pernah benar-benar selesai. Ia akan terus bertambah seiring berjalannya waktu dan cerita yang baru.</p>
