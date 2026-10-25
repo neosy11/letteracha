@@ -341,9 +341,20 @@ function initMuseumNavigation() {
       const el = document.createElement('div');
       el.className = `scrap-item ${item.type}`;
       el.dataset.rotation = item.rotation;
-      el.innerHTML = `<div class="scrap-pin"></div>${item.content}`;
       
-      // Terapkan posisi dan rotasi awal dari database
+      // Deteksi Teks atau Foto
+      let contentHTML = '';
+      if (item.type === 'photo') {
+        const { data: publicUrlData } = supabase.storage.from('museum_media').getPublicUrl(item.content);
+        contentHTML = `<img src="${publicUrlData.publicUrl}" alt="Polaroid">`;
+      } else {
+        contentHTML = item.content;
+      }
+
+      // Tombol hapus hanya muncul jika Kurator yang login
+      const deleteBtnHTML = STATE.isCurator ? `<button class="scrap-delete-btn" onclick="deleteScrap('${item.id}', '${item.type}', '${item.content}')">✕</button>` : '';
+
+      el.innerHTML = `${deleteBtnHTML}<div class="scrap-pin"></div>${contentHTML}`;
       el.style.transform = `translate(${item.pos_x}px, ${item.pos_y}px) rotate(${item.rotation}deg)`;
       canvas.appendChild(el);
 
@@ -356,8 +367,9 @@ function initMuseumNavigation() {
     let startX, startY, currentX = initialX, currentY = initialY;
 
     el.addEventListener('pointerdown', (e) => {
-      if (!STATE.isCurator) return; 
+      if (!STATE.isCurator || e.target.classList.contains('scrap-delete-btn')) return; 
       isDragging = true;
+      el.style.zIndex = 100; // Majukan ke depan saat ditarik
       startX = e.clientX - currentX;
       startY = e.clientY - currentY;
       el.setPointerCapture(e.pointerId);
@@ -373,21 +385,38 @@ function initMuseumNavigation() {
     el.addEventListener('pointerup', async (e) => {
       if (!isDragging) return;
       isDragging = false;
+      el.style.zIndex = 1;
       el.releasePointerCapture(e.pointerId);
       
-      // Update posisi baru ke Supabase di latar belakang
       await supabase.from('scrapbook').update({ pos_x: currentX, pos_y: currentY }).eq('id', id);
     });
   }
 
-  // Kontrol Penambahan Scrapbook
+  // Fungsi Global Menghapus Item
+  window.deleteScrap = async function(id, type, content) {
+    if (!STATE.isCurator) return;
+    if (!confirm('Apakah kamu yakin ingin mencabut memori ini dari papan?')) return;
+
+    const { error } = await supabase.from('scrapbook').delete().eq('id', id);
+    if (!error) {
+      // Jika yang dihapus foto, bersihkan juga filenya dari rak Storage
+      if (type === 'photo') supabase.storage.from('museum_media').remove([content]);
+      loadScrapbook();
+    } else {
+      showToast('Gagal mencabut memori.', 'error');
+    }
+  };
+
+  // Handler: Tambah Catatan Teks
   $('addScrapNoteBtn')?.addEventListener('click', async () => {
     if (!STATE.isCurator) return;
     const input = $('scrapNoteInput');
     if (!input.value.trim()) return;
 
-    // Koordinat acak di tengah kanvas dan rotasi miring acak
-    const randX = Math.floor(Math.random() * 200) + 100;
+    const btn = $('addScrapNoteBtn');
+    btn.disabled = true;
+
+    const randX = Math.floor(Math.random() * 200) + 50;
     const randY = Math.floor(Math.random() * 150) + 50;
     const randRot = Math.floor(Math.random() * 30) - 15;
 
@@ -395,9 +424,52 @@ function initMuseumNavigation() {
       type: 'note', content: input.value, pos_x: randX, pos_y: randY, rotation: randRot
     }]);
 
-    if (!error) {
-      input.value = '';
+    if (!error) { input.value = ''; loadScrapbook(); }
+    btn.disabled = false;
+  });
+
+  // Handler: Tambah Foto Polaroid
+  $('scrapImageInput')?.addEventListener('change', (e) => {
+    const label = document.querySelector('label[for="scrapImageInput"]');
+    label.textContent = e.target.files.length > 0 ? "1 Foto Dipilih" : "Pilih Foto";
+    label.style.border = e.target.files.length > 0 ? "1px solid var(--accent)" : "";
+  });
+
+  $('addScrapPhotoBtn')?.addEventListener('click', async () => {
+    if (!STATE.isCurator) return;
+    const fileInput = $('scrapImageInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return showToast("Silakan pilih foto terlebih dahulu.", "error");
+
+    const btn = $('addScrapPhotoBtn');
+    btn.disabled = true; btn.textContent = 'Menempel...';
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `scrapbook/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage.from('museum_media').upload(fileName, file);
+      if (uploadError) throw uploadError;
+
+      const randX = Math.floor(Math.random() * 200) + 50;
+      const randY = Math.floor(Math.random() * 150) + 50;
+      const randRot = Math.floor(Math.random() * 30) - 15;
+
+      const { error: insertError } = await supabase.from('scrapbook').insert([{
+        type: 'photo', content: fileName, pos_x: randX, pos_y: randY, rotation: randRot
+      }]);
+
+      if (insertError) throw insertError;
+      
+      fileInput.value = '';
+      document.querySelector('label[for="scrapImageInput"]').textContent = "Pilih Foto";
       loadScrapbook();
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal menempel foto.', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Tempel Foto';
     }
   });
   
