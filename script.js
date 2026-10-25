@@ -898,24 +898,6 @@ function initMuseumNavigation() {
     }
   }
 
-    // Jika layar HP (lebar di bawah 768px), partikel dikurangi jadi 15 saja
-    const particleCount = window.innerWidth < 768 ? 15 : 40;
-
-    for (let i = 0; i < particleCount; i++) {                 
-      const p = document.createElement("span");
-      p.className = "dust";
-      const size = Math.random() * 4 + 2;
-      p.style.cssText = `
-        left:${Math.random() * 100}%;
-        width: ${size}px; height: ${size}px;
-        animation-duration:${8 + Math.random() * 10}s;
-        animation-delay:${-Math.random() * 5}s;
-        will-change: transform, opacity; /* Bantuan Hardware Acceleration */
-      `;
-      box.appendChild(p);
-    }
-  }
-
  /* ===== OBSERVER & INIT ===== */
 
 const observer = new IntersectionObserver((entries) => {
@@ -949,11 +931,8 @@ checkAuth()
     console.error("Auth initialization error:", err);
   })
   .finally(() => {
-
     initGate();
     initFuture();
     initMuseumNavigation();
-
-});
-
+  });
 });
