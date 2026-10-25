@@ -13,7 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
     things: [],
     isCurator: false
   };
-
+// DAFTAR EMAIL YANG BERHAK MENJADI KURATOR
+  const CURATOR_EMAILS = [
+    "achacantik@gmail.com",
+    "neolycant@gmail.com"
+  ];
+  
   const CONFIG = {
     senderName: "Ahmad Syauqi",
     typeSpeedMs: 30,
@@ -182,18 +187,19 @@ if (authForm) {
         return;
       }
 
-      if (!data.session || !data.user) {
+     if (!data.session || !data.user) {
         throw new Error("Session login tidak ditemukan.");
       }
 
-      /* Simpan user */
+      /* Simpan user & Cek Email Kurator */
       STATE.user = data.user;
-      STATE.isCurator = true;
+      const loggedEmail = (data.user.email || "").trim().toLowerCase();
+      STATE.isCurator = CURATOR_EMAILS.includes(loggedEmail);
 
-      /* Aktifkan mode kurator */
-      $("curatorBadge")?.classList.remove("hidden");
-      $("titipBtn")?.classList.remove("hidden");
-      $("addReasonContainer")?.classList.remove("hidden");
+      /* Aktifkan mode kurator HANYA jika emailnya cocok */
+      $("curatorBadge")?.classList.toggle("hidden", !STATE.isCurator);
+      $("titipBtn")?.classList.toggle("hidden", !STATE.isCurator);
+      $("addReasonContainer")?.classList.toggle("hidden", !STATE.isCurator);
 
       /* Sembunyikan tombol login */
       if ($("loginBtn")) {
@@ -203,7 +209,7 @@ if (authForm) {
       /* Tutup modal */
       $("authModal").hidden = true;
 
-      showToast("Selamat datang kembali, Kurator!");
+      showToast(STATE.isCurator ? "Selamat datang kembali, Kurator!" : "Berhasil masuk ke museum.");
 
       /* Refresh data */
       await loadMemories();
@@ -540,8 +546,13 @@ function initMuseumNavigation() {
     $('progressText').textContent = `${completed} dari 100 momen telah terkumpul`;
   }
 
-  // Tambah Hal Baru
+ // Tambah Hal Baru
   $('saveReasonBtn').addEventListener('click', async () => {
+    // Pengaman: Tolak jika yang mengklik bukan kurator
+    if (!STATE.user || !STATE.isCurator) {
+      return showToast("Hanya kurator resmi yang dapat menambah daftar ini.", "error");
+    }
+
     const input = $('newReasonInput');
     const content = input.value.trim();
     if (!content) return;
