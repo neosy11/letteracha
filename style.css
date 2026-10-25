@@ -225,6 +225,15 @@ body::after {
 .scrap-item.note { font-family: var(--lora); font-size: 1.15rem; color: var(--text-main); text-align: center; line-height: 1.6; }
 .scrap-pin { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), 2px 2px 5px rgba(0,0,0,0.2); }
 
+/* Polaroid Photo Style */
+.scrap-item.photo { padding: 1rem 1rem 3.5rem 1rem; width: 220px; }
+.scrap-item.photo img { width: 100%; height: auto; object-fit: cover; border-radius: 2px; display: block; max-height: 250px; pointer-events: none; }
+
+/* Tombol Hapus Scrapbook */
+.scrap-delete-btn { position: absolute; top: -12px; right: -12px; width: 28px; height: 28px; background: var(--accent); color: var(--bg-color); border: none; border-radius: 50%; font-size: 0.85rem; font-weight: bold; cursor: pointer; opacity: 0; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.scrap-item:hover .scrap-delete-btn { opacity: 1; transform: scale(1); }
+.scrap-delete-btn:hover { background: var(--text-main); transform: scale(1.15) !important; }
+
 /* Media Queries */
 @media (min-width: 768px) { .sec { padding: 8rem 2rem; } }
 @media (max-width: 767px) {
