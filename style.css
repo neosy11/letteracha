@@ -212,6 +212,19 @@ body::after {
 @keyframes fade { from { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(20px); } }
 
+/* Museum Analytics */
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; width: min(100%, 65rem); padding-top: 3rem; }
+.stat-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border: 1px solid rgba(234, 224, 207, 0.2); border-radius: 4px; }
+.stat-num { font: 400 3.5rem var(--serif); color: var(--accent-light); line-height: 1; margin-bottom: 0.8rem; }
+.stat-label { font: 600 0.85rem var(--sans); letter-spacing: 1.5px; text-transform: uppercase; color: var(--bg-alt); }
+
+/* Scrapbook Canvas */
+.scrapbook-canvas { width: min(100%, 75rem); height: 70vh; background-color: var(--bg-color); background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px; border: 1px solid var(--border); position: relative; overflow: hidden; margin-top: 2rem; border-radius: 4px; box-shadow: inset 0 0 30px rgba(52, 40, 33, 0.03); touch-action: none; }
+.scrap-item { position: absolute; padding: 1.5rem 1.5rem 3rem 1.5rem; background: #FFF; box-shadow: 0 10px 25px rgba(52, 40, 33, 0.15); border: 1px solid #EBE6DD; cursor: grab; user-select: none; transition: box-shadow 0.2s; max-width: 250px; }
+.scrap-item:active { cursor: grabbing; box-shadow: 0 15px 35px rgba(52, 40, 33, 0.25); z-index: 100 !important; }
+.scrap-item.note { font-family: var(--lora); font-size: 1.15rem; color: var(--text-main); text-align: center; line-height: 1.6; }
+.scrap-pin { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), 2px 2px 5px rgba(0,0,0,0.2); }
+
 /* Media Queries */
 @media (min-width: 768px) { .sec { padding: 8rem 2rem; } }
 @media (max-width: 767px) {
