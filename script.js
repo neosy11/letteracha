@@ -288,6 +288,118 @@ function initMuseumNavigation() {
     navObserver.observe(section);
   });
 }
+ /* ===== MUSEUM ANALYTICS ===== */
+  function renderAnalytics() {
+    const grid = $('analyticsGrid');
+    if (!grid || !STATE.memories) return;
+
+    const totalMemories = STATE.memories.length;
+    let daysTogether = 0;
+    
+    if (totalMemories > 0) {
+      const oldestDate = new Date(Math.min(...STATE.memories.map(m => new Date(m.date))));
+      const today = new Date();
+      daysTogether = Math.floor((today - oldestDate) / (1000 * 60 * 60 * 24));
+    }
+
+    const totalThings = STATE.things ? STATE.things.filter(t => t.is_completed).length : 0;
+    
+    const categories = new Set(STATE.memories.map(m => m.category)).size;
+
+    grid.innerHTML = `
+      <div class="stat-card">
+        <span class="stat-num">${daysTogether}</span>
+        <span class="stat-label">Hari Perjalanan</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${totalMemories}</span>
+        <span class="stat-label">Momen Tersimpan</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${totalThings}</span>
+        <span class="stat-label">Hal Terwujud</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${categories}</span>
+        <span class="stat-label">Bab Cerita</span>
+      </div>
+    `;
+  }
+  
+  /* ===== INTERACTIVE SCRAPBOOK ===== */
+  async function loadScrapbook() {
+    const { data, error } = await supabase.from('scrapbook').select('*');
+    if (!error && data) renderScrapbook(data);
+  }
+
+  function renderScrapbook(items) {
+    const canvas = $('scrapbookCanvas');
+    if (!canvas) return;
+    canvas.innerHTML = '';
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = `scrap-item ${item.type}`;
+      el.dataset.rotation = item.rotation;
+      el.innerHTML = `<div class="scrap-pin"></div>${item.content}`;
+      
+      // Terapkan posisi dan rotasi awal dari database
+      el.style.transform = `translate(${item.pos_x}px, ${item.pos_y}px) rotate(${item.rotation}deg)`;
+      canvas.appendChild(el);
+
+      makeDraggable(el, item.id, parseFloat(item.pos_x), parseFloat(item.pos_y));
+    });
+  }
+
+  function makeDraggable(el, id, initialX, initialY) {
+    let isDragging = false;
+    let startX, startY, currentX = initialX, currentY = initialY;
+
+    el.addEventListener('pointerdown', (e) => {
+      if (!STATE.isCurator) return; 
+      isDragging = true;
+      startX = e.clientX - currentX;
+      startY = e.clientY - currentY;
+      el.setPointerCapture(e.pointerId);
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      currentX = e.clientX - startX;
+      currentY = e.clientY - startY;
+      el.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${el.dataset.rotation}deg)`;
+    });
+
+    el.addEventListener('pointerup', async (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      el.releasePointerCapture(e.pointerId);
+      
+      // Update posisi baru ke Supabase di latar belakang
+      await supabase.from('scrapbook').update({ pos_x: currentX, pos_y: currentY }).eq('id', id);
+    });
+  }
+
+  // Kontrol Penambahan Scrapbook
+  $('addScrapNoteBtn')?.addEventListener('click', async () => {
+    if (!STATE.isCurator) return;
+    const input = $('scrapNoteInput');
+    if (!input.value.trim()) return;
+
+    // Koordinat acak di tengah kanvas dan rotasi miring acak
+    const randX = Math.floor(Math.random() * 200) + 100;
+    const randY = Math.floor(Math.random() * 150) + 50;
+    const randRot = Math.floor(Math.random() * 30) - 15;
+
+    const { error } = await supabase.from('scrapbook').insert([{
+      type: 'note', content: input.value, pos_x: randX, pos_y: randY, rotation: randRot
+    }]);
+
+    if (!error) {
+      input.value = '';
+      loadScrapbook();
+    }
+  });
   
 /* ===== 01 GATE & NAVIGATION ===== */
   function initGate() {
